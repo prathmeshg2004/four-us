@@ -15,6 +15,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<'prathmesh' | 'vidhi' | null>(null);
   const [showHintModal, setShowHintModal] = useState(false);
+  const [showIntroPop, setShowIntroPop] = useState(true);
 
   // Auto-login if previously logged in AND session is within 24 hours
   useEffect(() => {
@@ -300,6 +301,25 @@ export default function LandingPage() {
               onClick={() => setShowHintModal(false)}
             >
               Got it! Let's Enter 💖
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Playful Intro Popup before login window */}
+      {showIntroPop && (
+        <div className="landing-intro-overlay" onClick={() => setShowIntroPop(false)}>
+          <div className="landing-intro-card animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="landing-intro-emoji">😉</div>
+            <p className="landing-intro-text">
+              Don't worry baby its nothing cliche, just very competitive 😉
+            </p>
+            <button
+              type="button"
+              className="landing-intro-btn"
+              onClick={() => setShowIntroPop(false)}
+            >
+              Bring it on! 😏
             </button>
           </div>
         </div>

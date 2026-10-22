@@ -199,3 +199,77 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   border: 1.5px solid #e2e8f0;
 }
+
+/* Intro Popup Modal Overlay */
+.landing-intro-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 24px;
+}
+
+.landing-intro-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 32px 24px 28px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  border: 1.5px solid #ede9fe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.landing-intro-emoji {
+  font-size: 3.8rem;
+  margin-bottom: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1));
+  animation: bounce-subtle 2s infinite ease-in-out;
+}
+
+.landing-intro-text {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.45;
+  margin: 0 0 24px 0;
+}
+
+.landing-intro-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.landing-intro-btn:active {
+  transform: scale(0.96);
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
