@@ -248,7 +248,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1;
-  min-height: 44px;
+  min-height: 56px;
   align-items: center;
 }
 
@@ -351,19 +351,19 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: white;
   border: 2.5px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
   padding: 0;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -372,39 +372,38 @@
   transform: translate(-50%, -50%) scale(0.92);
 }
 
-.dash-card-center-badge.clickable {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+.dash-card-center-badge.clickable:hover {
+  transform: translate(-50%, -50%) scale(1.04);
 }
 
 .dash-card-center-badge.completed {
-  background: #f8fafc;
-  border-color: #22c55e;
-  cursor: default;
+  filter: saturate(0.9);
 }
 
 .dash-badge-icon {
-  font-size: 1.35rem;
+  font-size: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
 }
 
 .dash-badge-check {
   position: absolute;
   bottom: -2px;
   right: -2px;
-  background: #22c55e;
+  background: #16a34a;
   color: white;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid white;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Outcome text under game */

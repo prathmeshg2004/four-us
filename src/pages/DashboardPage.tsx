@@ -39,11 +39,53 @@ interface DashboardPageProps {
   currentUserId: string;
 }
 
-const GAMES_LIST: { id: GameType; name: string; icon: string }[] = [
-  { id: 'fiveLetter', name: 'Wordle', icon: '🔠' },
-  { id: 'sudoku', name: 'Mini Sudoku', icon: '🔢' },
-  { id: 'wordGrid', name: 'Word Grid', icon: '🔤' },
-  { id: 'knowMe', name: 'Guess It', icon: '💭' },
+interface GameConfigItem {
+  id: GameType;
+  name: string;
+  icon: string;
+  color: string;
+  bgGradient: string;
+  borderColor: string;
+  shadowColor: string;
+}
+
+const GAMES_LIST: GameConfigItem[] = [
+  {
+    id: 'fiveLetter',
+    name: 'Wordle',
+    icon: '🔠',
+    color: '#15803d',
+    bgGradient: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+    borderColor: '#22c55e',
+    shadowColor: 'rgba(34, 197, 94, 0.32)',
+  },
+  {
+    id: 'sudoku',
+    name: 'Mini Sudoku',
+    icon: '🔢',
+    color: '#4338ca',
+    bgGradient: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
+    borderColor: '#6366f1',
+    shadowColor: 'rgba(99, 102, 241, 0.32)',
+  },
+  {
+    id: 'wordGrid',
+    name: 'Word Grid',
+    icon: '🔤',
+    color: '#b45309',
+    bgGradient: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+    borderColor: '#f59e0b',
+    shadowColor: 'rgba(245, 158, 11, 0.32)',
+  },
+  {
+    id: 'knowMe',
+    name: 'Guess It',
+    icon: '💭',
+    color: '#7e22ce',
+    bgGradient: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+    borderColor: '#a855f7',
+    shadowColor: 'rgba(168, 85, 247, 0.32)',
+  },
 ];
 
 export default function DashboardPage({
@@ -499,7 +541,9 @@ export default function DashboardPage({
               <div key={game.id} className="dash-game-card">
                 {/* Centered Game Name Header */}
                 <div className="dash-game-center-title">
-                  <span className="dash-game-name">{game.name}</span>
+                  <span className="dash-game-name" style={{ color: game.color }}>
+                    {game.name}
+                  </span>
                 </div>
 
                 {/* Split Card Body with Center Clickable Logo */}
@@ -536,6 +580,11 @@ export default function DashboardPage({
                   <button
                     type="button"
                     className={`dash-card-center-badge ${myAttempted ? 'completed' : 'clickable'}`}
+                    style={{
+                      background: game.bgGradient,
+                      borderColor: myAttempted ? '#16a34a' : game.borderColor,
+                      boxShadow: `0 4px 14px ${game.shadowColor}`,
+                    }}
                     onClick={() => {
                       if (!myAttempted) setActiveGame(game.id);
                     }}
