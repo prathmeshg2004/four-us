@@ -64,6 +64,7 @@ export default function DashboardPage({
   const [revealDayNumber, setRevealDayNumber] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [skippingDay, setSkippingDay] = useState(false);
 
   // Players
@@ -73,6 +74,16 @@ export default function DashboardPage({
   const p2Member = p2Id ? members[p2Id] : null;
 
   const myStatus = statuses[currentUserId];
+  const currentPlayerName = currentUserId === 'vidhi' ? 'Vidhi' : 'Prathmesh';
+
+  // Check if welcome popup should be shown on login/open
+  useEffect(() => {
+    const shouldWelcome = localStorage.getItem('fourUs_show_welcome');
+    if (shouldWelcome === 'true') {
+      setShowWelcome(true);
+      localStorage.removeItem('fourUs_show_welcome');
+    }
+  }, []);
 
   // Helper to check if a game is attempted
   const isGameAttempted = (status: PlayerDayStatus | undefined, game: GameType): boolean => {
@@ -292,80 +303,64 @@ export default function DashboardPage({
         } as React.CSSProperties
       }
     >
-      {/* Sticky Top Score Bar */}
+      {/* Redesigned Sleek Top Duel Score Card */}
       <div className="dash-sticky-top">
-        <div className="dash-sticky-header-row">
-          {/* Player 1 Side */}
-          <div className="dash-player-score-box">
+        <div className="dash-duel-header">
+          {/* Player 1 (Prathmesh) */}
+          <div className="dash-duel-player p1">
             <div
-              className="dash-avatar-badge"
+              className="dash-duel-avatar"
               style={{
                 borderColor: p1Color,
-                backgroundColor: `${p1Color}15`,
+                backgroundColor: `${p1Color}18`,
               }}
             >
-              {p1Member?.avatar || '👤'}
+              {p1Member?.avatar || '🦁'}
             </div>
-            <div className="dash-player-info">
-              <span className="dash-player-name">{p1Member?.displayName || 'Player 1'}</span>
-              <span className="dash-player-score" style={{ color: p1Color }}>
+            <div className="dash-duel-meta">
+              <span className="dash-duel-name">{p1Member?.displayName || 'Prathmesh'}</span>
+              <span className="dash-duel-score" style={{ color: p1Color }}>
                 {displayedP1Score}
               </span>
-              <div className="dash-score-mini-bar-track">
-                <div
-                  className="dash-score-mini-bar-fill"
-                  style={{
-                    width: `${Math.min(100, Math.max(displayedP1Score > 0 ? 12 : 0, (displayedP1Score / 20) * 100))}%`,
-                    backgroundColor: p1Color,
-                  }}
-                />
-              </div>
             </div>
           </div>
 
-          {/* VS Indicator */}
-          <div className="dash-vs-badge">VS</div>
+          {/* VS Center Badge */}
+          <div className="dash-duel-vs-wrap">
+            <span className="dash-duel-vs-pill">VS</span>
+          </div>
 
-          {/* Player 2 Side */}
-          <div className="dash-player-score-box player2">
-            <div
-              className="dash-avatar-badge"
-              style={{
-                borderColor: p2Color,
-                backgroundColor: `${p2Color}15`,
-              }}
-            >
-              {p2Member?.avatar || '👤'}
-            </div>
-            <div className="dash-player-info" style={{ alignItems: 'flex-end' }}>
-              <span className="dash-player-name">{p2Member?.displayName || 'Player 2'}</span>
-              <span className="dash-player-score" style={{ color: p2Color }}>
+          {/* Player 2 (Vidhi) */}
+          <div className="dash-duel-player p2">
+            <div className="dash-duel-meta right">
+              <span className="dash-duel-name">{p2Member?.displayName || 'Vidhi'}</span>
+              <span className="dash-duel-score" style={{ color: p2Color }}>
                 {displayedP2Score}
               </span>
-              <div className="dash-score-mini-bar-track player2">
-                <div
-                  className="dash-score-mini-bar-fill"
-                  style={{
-                    width: `${Math.min(100, Math.max(displayedP2Score > 0 ? 12 : 0, (displayedP2Score / 20) * 100))}%`,
-                    backgroundColor: p2Color,
-                  }}
-                />
-              </div>
+            </div>
+            <div
+              className="dash-duel-avatar"
+              style={{
+                borderColor: p2Color,
+                backgroundColor: `${p2Color}18`,
+              }}
+            >
+              {p2Member?.avatar || '🌸'}
             </div>
           </div>
         </div>
 
-        {/* Global Dual Score Bar directly below the scores */}
-        <div className="dash-top-score-bar-container">
+        {/* Global Dual Score Ratio Bar directly beneath the scores */}
+        <div className="dash-duel-ratio-track">
           <div
-            className="dash-top-score-bar-fill p1"
+            className="dash-duel-ratio-fill p1"
             style={{
               width: `${p1Ratio}%`,
               backgroundColor: p1Color,
             }}
           />
           <div
-            className="dash-top-score-bar-fill p2"
+            className="dash-duel-ratio-fill p2"
             style={{
               width: `${p2Ratio}%`,
               backgroundColor: p2Color,
@@ -374,22 +369,28 @@ export default function DashboardPage({
         </div>
       </div>
 
-      {/* Timers Bar */}
-      <div className="dash-timer-bar">
-        <div className="dash-day-badge-group">
-          <span className="dash-day-badge">Day {currentDay} of 10</span>
-          <button className="dash-help-btn" onClick={() => setShowTutorial(true)}>
-            ℹ️ Rules
-          </button>
+      {/* Redesigned Modern Sub-panel (Day X of 10 & Timers Ribbon) */}
+      <div className="dash-sub-panel">
+        <div className="dash-sub-pill day-pill">
+          <span className="dash-pill-icon">📅</span>
+          <span className="dash-pill-text">Day {currentDay}/10</span>
         </div>
-        <div className="dash-timers-right">
-          <div className="dash-timer-item">
-            Reveal: <span>{revealTimerFormatted}</span>
-          </div>
-          <div className="dash-timer-item">
-            Total: <span>{totalDaysText}</span>
-          </div>
+        <div className="dash-sub-pill timer-pill" title="Next game reveal countdown">
+          <span className="dash-pill-icon">⏳</span>
+          <span className="dash-pill-mono">{revealTimerFormatted}</span>
         </div>
+        <div className="dash-sub-pill total-pill">
+          <span className="dash-pill-icon">🏁</span>
+          <span className="dash-pill-text">{daysRemaining}d left</span>
+        </div>
+        <button
+          type="button"
+          className="dash-sub-action-btn"
+          onClick={() => setShowTutorial(true)}
+          title="Game Rules"
+        >
+          ℹ️
+        </button>
       </div>
 
       {/* History Modal / Drawer */}
@@ -516,7 +517,10 @@ export default function DashboardPage({
                   {/* Player 1 Left Side */}
                   <div className="dash-card-half p1">
                     {isScored ? (
-                      <div className="dash-green-circle" title={`Score: ${p1Points}`}>
+                      <div
+                        className={`dash-score-circle ${p1Points === 1 ? 'winner' : 'loser'}`}
+                        title={`Score: ${p1Points}`}
+                      >
                         {p1Points}
                       </div>
                     ) : (
@@ -546,7 +550,10 @@ export default function DashboardPage({
                   {/* Player 2 Right Side */}
                   <div className="dash-card-half p2">
                     {isScored ? (
-                      <div className="dash-green-circle" title={`Score: ${p2Points}`}>
+                      <div
+                        className={`dash-score-circle ${p2Points === 1 ? 'winner' : 'loser'}`}
+                        title={`Score: ${p2Points}`}
+                      >
                         {p2Points}
                       </div>
                     ) : (
@@ -570,25 +577,6 @@ export default function DashboardPage({
               </div>
             );
           })}
-
-          {/* Temporary Admin Testing Skip Button */}
-          <div className="dash-admin-card">
-            <div className="dash-admin-header">
-              <span>🛠️ Testing Controls</span>
-              <span className="dash-admin-tag">Temporary</span>
-            </div>
-            <p className="dash-admin-desc">
-              Test day completion, scoring calculations, and unlock the next round instantly:
-            </p>
-            <button
-              className="btn btn-secondary btn-full"
-              style={{ background: '#f8fafc', borderColor: '#cbd5e1', fontWeight: 700 }}
-              disabled={skippingDay}
-              onClick={handleSkipDay}
-            >
-              {skippingDay ? '⏳ Finalizing Day...' : `⏩ Skip to Day ${currentDay + 1}`}
-            </button>
-          </div>
         </div>
       )}
 
@@ -609,6 +597,31 @@ export default function DashboardPage({
           <span>History</span>
         </button>
       </div>
+
+      {/* Welcome Popup Modal */}
+      {showWelcome && (
+        <div className="dash-welcome-overlay" onClick={() => setShowWelcome(false)}>
+          <div className="dash-welcome-card animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontSize: '3rem', marginBottom: '8px' }}>
+              {currentUserId === 'vidhi' ? '🌸' : '🦁'}
+            </div>
+            <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#1e293b', margin: '0 0 6px 0' }}>
+              Welcome {currentPlayerName}!
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 20px 0', lineHeight: 1.4 }}>
+              Day {currentDay} of your 10-day duel is active. Tap any game logo below to play!
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary btn-full"
+              style={{ padding: '12px', borderRadius: '14px', fontWeight: 800 }}
+              onClick={() => setShowWelcome(false)}
+            >
+              Let's Play!
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tutorial Popup Modal */}
       {showTutorial && <TutorialModal onClose={handleCloseTutorial} />}

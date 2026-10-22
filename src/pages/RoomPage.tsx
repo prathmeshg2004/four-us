@@ -66,36 +66,11 @@ export default function RoomPage() {
     );
   }
 
-  // If user is not yet a member of this room (e.g. joined via direct link without profile)
-  const isMember = room.player1Id === user.uid || room.player2Id === user.uid;
-  if (!isMember && room.player2Id && room.player2Id !== user.uid) {
-    return (
-      <div
-        className="container"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100dvh',
-          textAlign: 'center',
-          gap: '16px',
-        }}
-      >
-        <div style={{ fontSize: '3rem' }}>🚫</div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Room is Full</h2>
-        <p style={{ color: '#64748b', maxWidth: '300px' }}>
-          Four Us is strictly a two-player private competition. This room already has two players!
-        </p>
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/')}
-        >
-          Create Your Own Room
-        </button>
-      </div>
-    );
-  }
+  // Two-player game authentication
+  const activePlayer = localStorage.getItem('fourUs_active_player');
+  const effectiveUserId = (activePlayer === 'prathmesh' || activePlayer === 'vidhi')
+    ? activePlayer
+    : user.uid;
 
   // Branch based on room status
   if (room.status === 'waiting' || room.status === 'lobby') {
@@ -104,7 +79,7 @@ export default function RoomPage() {
         roomId={roomId}
         room={room}
         members={members}
-        currentUserId={user.uid}
+        currentUserId={effectiveUserId}
       />
     );
   }
@@ -116,7 +91,7 @@ export default function RoomPage() {
         room={room}
         members={members}
         days={days}
-        currentUserId={user.uid}
+        currentUserId={effectiveUserId}
       />
     );
   }

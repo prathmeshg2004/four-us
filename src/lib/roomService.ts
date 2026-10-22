@@ -19,6 +19,88 @@ import {
 import { db, auth, ensureAuth } from './firebase';
 import { Room, PlayerMember, PlayerColor, RoomStatus } from '../types';
 
+export const FIXED_ROOM_ID = 'four-us-pv';
+
+export function verifyPlayerCode(inputCode: string): 'prathmesh' | 'vidhi' | null {
+  const clean = inputCode.trim().toUpperCase();
+  if (['PRATHMESH', 'PRATH', '2004', 'P1', '1111'].includes(clean)) {
+    return 'prathmesh';
+  }
+  if (['VIDHI', 'V1', '2222', '0000', 'VID'].includes(clean)) {
+    return 'vidhi';
+  }
+  return null;
+}
+
+export async function ensureFixedTwoPlayerGame(): Promise<string> {
+  let user = auth.currentUser;
+  if (!user) user = await ensureAuth();
+
+  const roomRef = doc(db, 'rooms', FIXED_ROOM_ID);
+  const snap = await getDoc(roomRef);
+
+  if (!snap.exists()) {
+    const now = Timestamp.now();
+    await setDoc(roomRef, {
+      code: 'FOURUS',
+      status: 'active',
+      createdAt: now,
+      startAt: now,
+      currentDay: 1,
+      player1Id: 'prathmesh',
+      player2Id: 'vidhi',
+      player1Score: 0,
+      player2Score: 0,
+      player1RecoveryToken: 'token_p1',
+      player2RecoveryToken: 'token_p2',
+    });
+
+    await setDoc(doc(db, 'rooms', FIXED_ROOM_ID, 'members', 'prathmesh'), {
+      displayName: 'Prathmesh',
+      color: 'coral',
+      avatar: '🦁',
+      ready: true,
+      joinedAt: now,
+    });
+
+    await setDoc(doc(db, 'rooms', FIXED_ROOM_ID, 'members', 'vidhi'), {
+      displayName: 'Vidhi',
+      color: 'teal',
+      avatar: '🌸',
+      ready: true,
+      joinedAt: now,
+    });
+
+    for (let day = 1; day <= 10; day++) {
+      const dayStartMs = now.toMillis() + (day - 1) * 24 * 60 * 60 * 1000;
+      const dayEndMs = dayStartMs + 24 * 60 * 60 * 1000;
+      const dayRef = doc(db, 'rooms', FIXED_ROOM_ID, 'days', String(day));
+      await setDoc(dayRef, {
+        dayNumber: day,
+        startsAt: Timestamp.fromMillis(dayStartMs),
+        endsAt: Timestamp.fromMillis(dayEndMs),
+        finalized: false,
+        resultSummary: null,
+      });
+
+      await setDoc(doc(db, 'rooms', FIXED_ROOM_ID, 'days', String(day), 'statuses', 'prathmesh'), {
+        fiveLetterAttempted: false,
+        sudokuAttempted: false,
+        wordGridAttempted: false,
+        knowMeAttempted: false,
+      });
+      await setDoc(doc(db, 'rooms', FIXED_ROOM_ID, 'days', String(day), 'statuses', 'vidhi'), {
+        fiveLetterAttempted: false,
+        sudokuAttempted: false,
+        wordGridAttempted: false,
+        knowMeAttempted: false,
+      });
+    }
+  }
+
+  return FIXED_ROOM_ID;
+}
+
 // Generate a short 6-char alphanumeric room code
 function generateRoomCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';

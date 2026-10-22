@@ -21,6 +21,10 @@ import {
   GameType,
 } from '../types';
 
+export function getActivePlayerId(): string {
+  return localStorage.getItem('fourUs_active_player') || 'prathmesh';
+}
+
 // Submit a game attempt
 export async function submitAttempt(
   roomId: string,
@@ -30,8 +34,11 @@ export async function submitAttempt(
   let user = auth.currentUser;
   if (!user) user = await ensureAuth();
 
+  const playerId = getActivePlayerId();
+  attempt.playerId = playerId;
+
   const attemptRef = doc(
-    db, 'rooms', roomId, 'days', String(dayNumber), 'attempts', user.uid
+    db, 'rooms', roomId, 'days', String(dayNumber), 'attempts', playerId
   );
 
   // Use a transaction to prevent duplicate submissions
@@ -57,7 +64,7 @@ export async function submitAttempt(
 
     // Update the public status (use set with merge: true so it never throws if document was not pre-created)
     const statusRef = doc(
-      db, 'rooms', roomId, 'days', String(dayNumber), 'statuses', user.uid
+      db, 'rooms', roomId, 'days', String(dayNumber), 'statuses', playerId
     );
     const statusKey = `${attempt.gameType}Attempted`;
     transaction.set(statusRef, {
@@ -75,8 +82,9 @@ export async function getMyAttempt(
   let user = auth.currentUser;
   if (!user) user = await ensureAuth();
 
+  const playerId = getActivePlayerId();
   const attemptRef = doc(
-    db, 'rooms', roomId, 'days', String(dayNumber), 'attempts', user.uid
+    db, 'rooms', roomId, 'days', String(dayNumber), 'attempts', playerId
   );
   const snap = await getDoc(attemptRef);
 
@@ -95,8 +103,9 @@ export async function saveGameProgress(
   let user = auth.currentUser;
   if (!user) user = await ensureAuth();
 
+  const playerId = getActivePlayerId();
   const progressRef = doc(
-    db, 'rooms', roomId, 'days', String(dayNumber), 'progress', user.uid
+    db, 'rooms', roomId, 'days', String(dayNumber), 'progress', playerId
   );
 
   await setDoc(progressRef, {
@@ -116,8 +125,9 @@ export async function getGameProgress(
   let user = auth.currentUser;
   if (!user) user = await ensureAuth();
 
+  const playerId = getActivePlayerId();
   const progressRef = doc(
-    db, 'rooms', roomId, 'days', String(dayNumber), 'progress', user.uid
+    db, 'rooms', roomId, 'days', String(dayNumber), 'progress', playerId
   );
   const snap = await getDoc(progressRef);
 

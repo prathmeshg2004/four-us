@@ -1,251 +1,187 @@
 // ============================================================
-// Landing Page — Create or Join a Room
+// Landing Page — Two-Player Access Code Login
 // ============================================================
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createRoom, findRoomByCode, joinRoom } from '../lib/roomService';
+import { ensureFixedTwoPlayerGame, verifyPlayerCode, FIXED_ROOM_ID } from '../lib/roomService';
 import { ensureAuth } from '../lib/firebase';
-import { PlayerColor, PLAYER_COLORS } from '../types';
 import './LandingPage.css';
-
-const EMOJIS = ['😊', '😎', '🥰', '🤗', '😄', '🌟', '💫', '🎮', '🎯', '💜', '🦋', '🌸'];
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<'home' | 'create' | 'join' | 'recover'>('home');
-  const [displayName, setDisplayName] = useState('');
-  const [selectedColor, setSelectedColor] = useState<PlayerColor>('coral');
-  const [selectedEmoji, setSelectedEmoji] = useState('😊');
-  const [roomCode, setRoomCode] = useState('');
-  const [recoveryToken, setRecoveryToken] = useState('');
+  const [inputCode, setInputCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<'prathmesh' | 'vidhi' | null>(null);
 
-  const handleCreate = async () => {
-    if (!displayName.trim()) {
-      setError('Please enter a display name');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    try {
-      const { roomId } = await createRoom(
-        displayName.trim(),
-        selectedColor,
-        selectedEmoji
-      );
-      navigate(`/room/${roomId}`);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create room');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleJoin = async () => {
-    if (!displayName.trim()) {
-      setError('Please enter a display name');
-      return;
-    }
-    if (!roomCode.trim()) {
-      setError('Please enter a room code');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    try {
-      const roomId = await findRoomByCode(roomCode.trim());
-      if (!roomId) {
-        setError('Room not found. Check the code and try again.');
-        setLoading(false);
-        return;
+  // Auto-login if previously logged in
+  useEffect(() => {
+    async function autoLogin() {
+      try {
+        await ensureAuth();
+        const savedPlayer = localStorage.getItem('fourUs_active_player');
+        if (savedPlayer === 'prathmesh' || savedPlayer === 'vidhi') {
+          await ensureFixedTwoPlayerGame();
+          navigate(`/room/${FIXED_ROOM_ID}`);
+        }
+      } catch (err) {
+        console.error('Auto login check error:', err);
       }
-      await joinRoom(roomId, displayName.trim(), selectedColor, selectedEmoji);
-      navigate(`/room/${roomId}`);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to join room');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const handleRecover = async () => {
-    if (!recoveryToken.trim()) {
-      setError('Please enter your recovery token');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    try {
-      const { recoverRoom } = await import('../lib/roomService');
-      const result = await recoverRoom(recoveryToken.trim());
-      if (!result) {
-        setError('Invalid recovery token');
-        setLoading(false);
-        return;
-      }
-      localStorage.setItem('fourUs_roomId', result.roomId);
-      navigate(`/room/${result.roomId}`);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Recovery failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Check for existing room and ensure auth on mount
-  React.useEffect(() => {
-    ensureAuth().catch(console.error);
-    const savedRoom = localStorage.getItem('fourUs_roomId');
-    if (savedRoom) {
-      navigate(`/room/${savedRoom}`);
-    }
+    autoLogin();
   }, [navigate]);
 
-  if (mode === 'home') {
-    return (
-      <div className="landing-page">
-        <div className="landing-hero">
-          <div className="landing-logo">🎮</div>
-          <h1 className="landing-title">Four Us</h1>
-          <p className="landing-subtitle">
-            A 10-day game for two. Four daily challenges.<br />
-            Who knows each other best?
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setError('');
+
+    const matchedPlayer = selectedPlayer || verifyPlayerCode(inputCode);
+
+    if (!matchedPlayer) {
+      setError('Invalid login code. Please enter your player code.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await ensureAuth();
+      await ensureFixedTwoPlayerGame();
+      localStorage.setItem('fourUs_active_player', matchedPlayer);
+      localStorage.setItem('fourUs_show_welcome', 'true');
+      navigate(`/room/${FIXED_ROOM_ID}`);
+    } catch (err: unknown) {
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to connect. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickSelect = (player: 'prathmesh' | 'vidhi') => {
+    setSelectedPlayer(player);
+    setInputCode(player === 'prathmesh' ? 'PRATHMESH' : 'VIDHI');
+  };
+
+  return (
+    <div className="landing-page animate-fade-in">
+      <div className="landing-container" style={{ maxWidth: '380px', margin: '0 auto', textAlign: 'center', padding: '32px 16px' }}>
+        {/* Brand Header */}
+        <div style={{ marginBottom: '28px' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '8px' }}>✨</div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: '#1e293b', margin: '0 0 6px 0' }}>
+            Four Us
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0, fontWeight: 600 }}>
+            Prathmesh &amp; Vidhi's 10-Day Duel
           </p>
         </div>
 
-        <div className="landing-actions">
+        {/* Quick Player Choice Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
           <button
-            className="btn btn-primary btn-large btn-full"
-            onClick={() => setMode('create')}
+            type="button"
+            onClick={() => handleQuickSelect('prathmesh')}
+            style={{
+              padding: '16px 12px',
+              borderRadius: '16px',
+              border: selectedPlayer === 'prathmesh' ? '2.5px solid #FF6B6B' : '1.5px solid #e2e8f0',
+              background: selectedPlayer === 'prathmesh' ? '#fff5f5' : '#ffffff',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s ease',
+              boxShadow: selectedPlayer === 'prathmesh' ? '0 4px 12px rgba(255, 107, 107, 0.2)' : '0 1px 3px rgba(0,0,0,0.05)',
+            }}
           >
-            Create Room
+            <span style={{ fontSize: '2rem' }}>🦁</span>
+            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e293b' }}>Prathmesh</span>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>Player 1</span>
           </button>
+
           <button
-            className="btn btn-secondary btn-large btn-full"
-            onClick={() => setMode('join')}
+            type="button"
+            onClick={() => handleQuickSelect('vidhi')}
+            style={{
+              padding: '16px 12px',
+              borderRadius: '16px',
+              border: selectedPlayer === 'vidhi' ? '2.5px solid #4ECDC4' : '1.5px solid #e2e8f0',
+              background: selectedPlayer === 'vidhi' ? '#f0fdfa' : '#ffffff',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s ease',
+              boxShadow: selectedPlayer === 'vidhi' ? '0 4px 12px rgba(78, 205, 196, 0.2)' : '0 1px 3px rgba(0,0,0,0.05)',
+            }}
           >
-            Join Room
-          </button>
-          <button
-            className="landing-recover-link"
-            onClick={() => setMode('recover')}
-          >
-            Recover existing game
+            <span style={{ fontSize: '2rem' }}>🌸</span>
+            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e293b' }}>Vidhi</span>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>Player 2</span>
           </button>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="landing-page">
-      <button className="landing-back" onClick={() => { setMode('home'); setError(''); }}>
-        ← Back
-      </button>
+        {/* Code Input Form */}
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '6px', textAlign: 'left' }}>
+              Player Access Code
+            </label>
+            <input
+              type="text"
+              value={inputCode}
+              onChange={(e) => {
+                setInputCode(e.target.value);
+                const matched = verifyPlayerCode(e.target.value);
+                if (matched) setSelectedPlayer(matched);
+              }}
+              placeholder="Enter code (e.g. PRATHMESH or VIDHI)"
+              autoCapitalize="characters"
+              autoComplete="off"
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                borderRadius: '14px',
+                border: '1.5px solid #cbd5e1',
+                fontSize: '1rem',
+                fontWeight: 700,
+                textAlign: 'center',
+                letterSpacing: '0.05em',
+                boxSizing: 'border-box',
+                outline: 'none',
+              }}
+            />
+          </div>
 
-      <div className="landing-form">
-        <h2>{mode === 'create' ? 'Create Room' : mode === 'join' ? 'Join Room' : 'Recover Game'}</h2>
-
-        {mode === 'recover' ? (
-          <>
-            <div className="form-group">
-              <label>Recovery Token</label>
-              <input
-                className="input"
-                type="text"
-                placeholder="Enter your recovery token"
-                value={recoveryToken}
-                onChange={(e) => setRecoveryToken(e.target.value)}
-              />
+          {error && (
+            <div style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 600 }}>
+              {error}
             </div>
-            {error && <p className="error-text">{error}</p>}
-            <button
-              className="btn btn-primary btn-full"
-              onClick={handleRecover}
-              disabled={loading}
-            >
-              {loading ? 'Recovering...' : 'Recover'}
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="form-group">
-              <label>Display Name</label>
-              <input
-                className="input"
-                type="text"
-                placeholder="Your name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                maxLength={20}
-              />
-            </div>
+          )}
 
-            {mode === 'join' && (
-              <div className="form-group">
-                <label>Room Code</label>
-                <input
-                  className="input room-code-input"
-                  type="text"
-                  placeholder="e.g. ABC123"
-                  value={roomCode}
-                  onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  maxLength={6}
-                />
-              </div>
-            )}
-
-            <div className="form-group">
-              <label>Choose your color</label>
-              <div className="color-picker">
-                {(Object.entries(PLAYER_COLORS) as [PlayerColor, string][]).map(
-                  ([name, hex]) => (
-                    <button
-                      key={name}
-                      className={`color-swatch ${selectedColor === name ? 'selected' : ''}`}
-                      style={{ backgroundColor: hex }}
-                      onClick={() => setSelectedColor(name)}
-                      aria-label={name}
-                    />
-                  )
-                )}
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Choose an avatar</label>
-              <div className="emoji-picker">
-                {EMOJIS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    className={`emoji-btn ${selectedEmoji === emoji ? 'selected' : ''}`}
-                    onClick={() => setSelectedEmoji(emoji)}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {error && <p className="error-text">{error}</p>}
-
-            <button
-              className="btn btn-primary btn-full"
-              onClick={mode === 'create' ? handleCreate : handleJoin}
-              disabled={loading}
-            >
-              {loading
-                ? mode === 'create'
-                  ? 'Creating...'
-                  : 'Joining...'
-                : mode === 'create'
-                ? 'Create Room'
-                : 'Join Room'}
-            </button>
-          </>
-        )}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: '14px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              color: 'white',
+              fontSize: '1rem',
+              fontWeight: 800,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
+              boxShadow: '0 4px 14px rgba(102, 126, 234, 0.35)',
+              transition: 'transform 0.15s ease',
+            }}
+          >
+            {loading ? 'Entering Game...' : 'Let\'s Play →'}
+          </button>
+        </form>
       </div>
     </div>
   );

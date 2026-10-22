@@ -4,6 +4,7 @@
 
 import React, { useState } from 'react';
 import { DayResultSummary, PlayerMember, PLAYER_COLORS } from '../../types';
+import { getKnowMeForDay } from '../../content/knowMePrompts';
 import './DailyReveal.css';
 
 interface DailyRevealProps {
@@ -265,49 +266,79 @@ export default function DailyReveal({
             </>
           )}
 
-          {currentStep === 3 && (
-            /* Game 4: Know Me */
-            <>
-              <div className="reveal-game-badge">Game 4 of 4</div>
-              <div className="reveal-icon-big">💭</div>
-              <div className="reveal-game-title">Guess It</div>
-              <div className="reveal-knowme-box">
-                <div className="reveal-knowme-row">
-                  <strong>{p1Member.displayName}'s Answer:</strong>
-                  <span>{resultSummary.knowMe.player1Answer || 'No answer'}</span>
+          {currentStep === 3 && (() => {
+            const knowMePrompt = getKnowMeForDay(dayNumber);
+            const getOptionText = (letter: string | null) => {
+              if (!letter) return 'No answer';
+              const idx = 'ABCD'.indexOf(letter.toUpperCase());
+              if (idx >= 0 && idx < knowMePrompt.options.length) {
+                return `(${letter}) ${knowMePrompt.options[idx]}`;
+              }
+              return letter;
+            };
+
+            return (
+              /* Game 4: Know Me */
+              <>
+                <div className="reveal-game-badge">Game 4 of 4</div>
+                <div className="reveal-icon-big">💭</div>
+                <div className="reveal-game-title">Guess It</div>
+
+                {/* Question Prompt */}
+                <div
+                  style={{
+                    background: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    margin: '0 0 12px 0',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    color: '#334155',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  "{knowMePrompt.promptText}"
                 </div>
-                <div className="reveal-knowme-row">
-                  <strong>{p2Member.displayName}'s Prediction:</strong>
-                  <span
-                    style={{
-                      color: resultSummary.knowMe.player2Correct ? '#16a34a' : '#dc2626',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {resultSummary.knowMe.player2Prediction || 'None'}{' '}
-                    {resultSummary.knowMe.player2Correct ? '✓ (+1)' : '✗'}
-                  </span>
+
+                <div className="reveal-knowme-box">
+                  <div className="reveal-knowme-row">
+                    <strong>{p1Member.displayName}'s Answer:</strong>
+                    <span>{getOptionText(resultSummary.knowMe.player1Answer)}</span>
+                  </div>
+                  <div className="reveal-knowme-row">
+                    <strong>{p2Member.displayName}'s Prediction:</strong>
+                    <span
+                      style={{
+                        color: resultSummary.knowMe.player2Correct ? '#16a34a' : '#dc2626',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {getOptionText(resultSummary.knowMe.player2Prediction)}{' '}
+                      {resultSummary.knowMe.player2Correct ? '✓ (+1)' : '✗'}
+                    </span>
+                  </div>
+                  <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+                  <div className="reveal-knowme-row">
+                    <strong>{p2Member.displayName}'s Answer:</strong>
+                    <span>{getOptionText(resultSummary.knowMe.player2Answer)}</span>
+                  </div>
+                  <div className="reveal-knowme-row">
+                    <strong>{p1Member.displayName}'s Prediction:</strong>
+                    <span
+                      style={{
+                        color: resultSummary.knowMe.player1Correct ? '#16a34a' : '#dc2626',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {getOptionText(resultSummary.knowMe.player1Prediction)}{' '}
+                      {resultSummary.knowMe.player1Correct ? '✓ (+1)' : '✗'}
+                    </span>
+                  </div>
                 </div>
-                <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-                <div className="reveal-knowme-row">
-                  <strong>{p2Member.displayName}'s Answer:</strong>
-                  <span>{resultSummary.knowMe.player2Answer || 'No answer'}</span>
-                </div>
-                <div className="reveal-knowme-row">
-                  <strong>{p1Member.displayName}'s Prediction:</strong>
-                  <span
-                    style={{
-                      color: resultSummary.knowMe.player1Correct ? '#16a34a' : '#dc2626',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {resultSummary.knowMe.player1Prediction || 'None'}{' '}
-                    {resultSummary.knowMe.player1Correct ? '✓ (+1)' : '✗'}
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
+              </>
+            );
+          })()}
 
           {currentStep === 4 && (
             /* Day Summary */
