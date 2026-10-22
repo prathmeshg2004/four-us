@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createRoom, findRoomByCode, joinRoom } from '../lib/roomService';
+import { ensureAuth } from '../lib/firebase';
 import { PlayerColor, PLAYER_COLORS } from '../types';
 import './LandingPage.css';
 
@@ -93,8 +94,9 @@ export default function LandingPage() {
     }
   };
 
-  // Check for existing room
+  // Check for existing room and ensure auth on mount
   React.useEffect(() => {
+    ensureAuth().catch(console.error);
     const savedRoom = localStorage.getItem('fourUs_roomId');
     if (savedRoom) {
       navigate(`/room/${savedRoom}`);

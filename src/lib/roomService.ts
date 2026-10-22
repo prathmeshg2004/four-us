@@ -90,6 +90,11 @@ export async function createRoom(
 }
 
 export async function findRoomByCode(code: string): Promise<string | null> {
+  let user = auth.currentUser;
+  if (!user) {
+    user = await ensureAuth();
+  }
+
   const q = query(
     collection(db, 'rooms'),
     where('code', '==', code.toUpperCase())
