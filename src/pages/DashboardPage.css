@@ -354,9 +354,9 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: white;
-  border: 2.5px solid var(--border-color);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -374,36 +374,37 @@
 
 .dash-card-center-badge.clickable:hover {
   transform: translate(-50%, -50%) scale(1.04);
+  border-color: #cbd5e1;
 }
 
 .dash-card-center-badge.completed {
-  filter: saturate(0.9);
+  background: #f8fafc;
+  border-color: #22c55e;
 }
 
 .dash-badge-icon {
-  font-size: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  color: #6366f1; /* Slight, tasteful color unified across all game logos */
+  transition: transform 0.15s ease;
 }
 
 .dash-badge-check {
   position: absolute;
   bottom: -2px;
   right: -2px;
-  background: #16a34a;
+  background: #22c55e;
   color: white;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1.5px solid white;
 }
 
 /* Outcome text under game */

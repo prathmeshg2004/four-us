@@ -39,54 +39,66 @@ interface DashboardPageProps {
   currentUserId: string;
 }
 
-interface GameConfigItem {
-  id: GameType;
-  name: string;
-  icon: string;
-  color: string;
-  bgGradient: string;
-  borderColor: string;
-  shadowColor: string;
-}
-
-const GAMES_LIST: GameConfigItem[] = [
-  {
-    id: 'fiveLetter',
-    name: 'Wordle',
-    icon: '🔠',
-    color: '#15803d',
-    bgGradient: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-    borderColor: '#22c55e',
-    shadowColor: 'rgba(34, 197, 94, 0.32)',
-  },
-  {
-    id: 'sudoku',
-    name: 'Mini Sudoku',
-    icon: '🔢',
-    color: '#4338ca',
-    bgGradient: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
-    borderColor: '#6366f1',
-    shadowColor: 'rgba(99, 102, 241, 0.32)',
-  },
-  {
-    id: 'wordGrid',
-    name: 'Word Grid',
-    icon: '🔤',
-    color: '#b45309',
-    bgGradient: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
-    borderColor: '#f59e0b',
-    shadowColor: 'rgba(245, 158, 11, 0.32)',
-  },
-  {
-    id: 'knowMe',
-    name: 'Guess It',
-    icon: '💭',
-    color: '#7e22ce',
-    bgGradient: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-    borderColor: '#a855f7',
-    shadowColor: 'rgba(168, 85, 247, 0.32)',
-  },
+const GAMES_LIST: { id: GameType; name: string }[] = [
+  { id: 'fiveLetter', name: 'Wordle' },
+  { id: 'sudoku', name: 'Mini Sudoku' },
+  { id: 'wordGrid', name: 'Word Grid' },
+  { id: 'knowMe', name: 'Guess It' },
 ];
+
+function GameLogo({ gameId }: { gameId: GameType }) {
+  const size = 26;
+  switch (gameId) {
+    case 'fiveLetter':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="5.5" height="5.5" rx="1.2" fill="currentColor" fillOpacity="0.2" />
+          <rect x="9.25" y="2" width="5.5" height="5.5" rx="1.2" fill="currentColor" fillOpacity="0.2" />
+          <rect x="16.5" y="2" width="5.5" height="5.5" rx="1.2" fill="currentColor" />
+          <rect x="2" y="9.25" width="5.5" height="5.5" rx="1.2" fill="currentColor" />
+          <rect x="9.25" y="9.25" width="5.5" height="5.5" rx="1.2" fill="currentColor" fillOpacity="0.2" />
+          <rect x="16.5" y="9.25" width="5.5" height="5.5" rx="1.2" fill="currentColor" fillOpacity="0.2" />
+          <rect x="2" y="16.5" width="5.5" height="5.5" rx="1.2" fill="currentColor" />
+          <rect x="9.25" y="16.5" width="5.5" height="5.5" rx="1.2" fill="currentColor" />
+          <rect x="16.5" y="16.5" width="5.5" height="5.5" rx="1.2" fill="currentColor" />
+        </svg>
+      );
+    case 'sudoku':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2.5" y="2.5" width="19" height="19" rx="2" strokeWidth="2" />
+          <line x1="8.8" y1="2.5" x2="8.8" y2="21.5" strokeWidth="1.2" />
+          <line x1="15.2" y1="2.5" x2="15.2" y2="21.5" strokeWidth="1.2" />
+          <line x1="2.5" y1="12" x2="21.5" y2="12" strokeWidth="2" />
+          <circle cx="5.6" cy="7.25" r="1.3" fill="currentColor" />
+          <circle cx="12" cy="7.25" r="1.3" fill="currentColor" />
+          <circle cx="18.4" cy="7.25" r="1.3" fill="currentColor" />
+          <circle cx="5.6" cy="16.75" r="1.3" fill="currentColor" />
+          <circle cx="18.4" cy="16.75" r="1.3" fill="currentColor" />
+        </svg>
+      );
+    case 'wordGrid':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2.5" y="2.5" width="19" height="19" rx="2" />
+          <line x1="2.5" y1="8.8" x2="21.5" y2="8.8" strokeWidth="1.2" />
+          <line x1="2.5" y1="15.2" x2="21.5" y2="15.2" strokeWidth="1.2" />
+          <line x1="8.8" y1="2.5" x2="8.8" y2="21.5" strokeWidth="1.2" />
+          <line x1="15.2" y1="2.5" x2="15.2" y2="21.5" strokeWidth="1.2" />
+          <path d="M5.6 5.6 L12 5.6 L18.4 12 L12 18.4" strokeWidth="2.5" stroke="currentColor" fill="none" />
+          <circle cx="12" cy="18.4" r="1.5" fill="currentColor" />
+        </svg>
+      );
+    case 'knowMe':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" fill="currentColor" fillOpacity="0.18" />
+          <circle cx="12" cy="16.5" r="1.2" fill="currentColor" />
+          <path d="M10 9a2 2 0 1 1 3.5 1.4c-.7.6-1.5 1.1-1.5 2.1" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      );
+  }
+}
 
 export default function DashboardPage({
   roomId,
@@ -541,9 +553,7 @@ export default function DashboardPage({
               <div key={game.id} className="dash-game-card">
                 {/* Centered Game Name Header */}
                 <div className="dash-game-center-title">
-                  <span className="dash-game-name" style={{ color: game.color }}>
-                    {game.name}
-                  </span>
+                  <span className="dash-game-name">{game.name}</span>
                 </div>
 
                 {/* Split Card Body with Center Clickable Logo */}
@@ -580,17 +590,14 @@ export default function DashboardPage({
                   <button
                     type="button"
                     className={`dash-card-center-badge ${myAttempted ? 'completed' : 'clickable'}`}
-                    style={{
-                      background: game.bgGradient,
-                      borderColor: myAttempted ? '#16a34a' : game.borderColor,
-                      boxShadow: `0 4px 14px ${game.shadowColor}`,
-                    }}
                     onClick={() => {
                       if (!myAttempted) setActiveGame(game.id);
                     }}
                     title={myAttempted ? 'Completed' : `Play ${game.name}`}
                   >
-                    <span className="dash-badge-icon">{game.icon}</span>
+                    <span className="dash-badge-icon">
+                      <GameLogo gameId={game.id} />
+                    </span>
                     {myAttempted && <span className="dash-badge-check">✓</span>}
                   </button>
 
