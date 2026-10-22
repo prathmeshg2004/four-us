@@ -32,10 +32,10 @@ interface DashboardPageProps {
 }
 
 const GAMES_LIST: { id: GameType; name: string; icon: string }[] = [
-  { id: 'fiveLetter', name: 'Five Letter', icon: '🟩' },
+  { id: 'fiveLetter', name: 'Wordle', icon: '🔠' },
   { id: 'sudoku', name: 'Mini Sudoku', icon: '🔢' },
   { id: 'wordGrid', name: 'Word Grid', icon: '🔤' },
-  { id: 'knowMe', name: 'Know Me', icon: '💡' },
+  { id: 'knowMe', name: 'Guess It', icon: '💭' },
 ];
 
 export default function DashboardPage({
@@ -86,19 +86,6 @@ export default function DashboardPage({
     setShowTutorial(false);
   };
 
-  // Safe rollover check: only finalize if endsAt exists and has strictly passed in real-time
-  useEffect(() => {
-    if (
-      currentDayRecord?.endsAt &&
-      Date.now() >= currentDayRecord.endsAt.toMillis() &&
-      !currentDayRecord.finalized
-    ) {
-      finalizeDayInFirestore(roomId, currentDay).then(() => {
-        setRevealDayNumber(currentDay);
-      });
-    }
-  }, [currentDayRecord, roomId, currentDay]);
-
   // Check if previous day was finalized and needs a reveal presentation
   useEffect(() => {
     if (currentDay > 1) {
@@ -111,7 +98,7 @@ export default function DashboardPage({
     }
   }, [currentDay, days, roomId]);
 
-  // Temporary Skip Day function
+  // Temporary Skip Day function (Test Tool)
   const handleSkipDay = async () => {
     if (skippingDay) return;
     setSkippingDay(true);
@@ -297,11 +284,11 @@ export default function DashboardPage({
               if (game.id === 'knowMe') {
                 const km = daySummary.knowMe;
                 if (km.player1Point && km.player2Point) {
-                  outcomeText = '🎉 Both predicted correctly! (+1 each)';
+                  outcomeText = '🎉 Both guessed correctly! (+1 each)';
                 } else if (km.player1Point) {
-                  outcomeText = `🎉 ${p1Member?.displayName} predicted correctly (+1 pt)`;
+                  outcomeText = `🎉 ${p1Member?.displayName} guessed correctly (+1 pt)`;
                 } else if (km.player2Point) {
-                  outcomeText = `🎉 ${p2Member?.displayName} predicted correctly (+1 pt)`;
+                  outcomeText = `🎉 ${p2Member?.displayName} guessed correctly (+1 pt)`;
                 } else {
                   outcomeText = 'No predictions matched';
                 }
@@ -315,28 +302,20 @@ export default function DashboardPage({
                 }
               }
             } else if (bothAttempted) {
-              outcomeText = '✨ Both players have submitted! Points reveal at rollover.';
+              outcomeText = '✨ Both players have submitted! Winner reveals at rollover.';
             }
 
             return (
               <div key={game.id} className="dash-game-card">
-                {/* Game Title Bar */}
-                <div className="dash-game-header">
+                {/* Centered Game Name Header */}
+                <div className="dash-game-center-title">
                   <span className="dash-game-name">{game.name}</span>
-                  <button
-                    className={`dash-game-play-btn ${myAttempted ? 'done' : ''}`}
-                    disabled={myAttempted}
-                    onClick={() => setActiveGame(game.id)}
-                  >
-                    {myAttempted ? '✓ Completed' : 'Play Now →'}
-                  </button>
                 </div>
 
-                {/* Split Card Body with Center Logo */}
+                {/* Split Card Body with Center Clickable Logo */}
                 <div className="dash-card-split-body">
                   {/* Player 1 Left Side */}
                   <div className="dash-card-half p1">
-                    <span className="dash-side-player-name">{p1Member?.displayName || 'P1'}</span>
                     <span
                       className={`dash-status-pill ${
                         p1Attempted ? 'attempted' : 'not-attempted'
@@ -346,14 +325,21 @@ export default function DashboardPage({
                     </span>
                   </div>
 
-                  {/* Center Logo Badge directly on divider */}
-                  <div className="dash-card-center-badge">
-                    <span>{game.icon}</span>
-                  </div>
+                  {/* Center Clickable Logo Badge (Tapping this launches the game!) */}
+                  <button
+                    type="button"
+                    className={`dash-card-center-badge ${myAttempted ? 'completed' : 'clickable'}`}
+                    onClick={() => {
+                      if (!myAttempted) setActiveGame(game.id);
+                    }}
+                    title={myAttempted ? 'Completed' : `Play ${game.name}`}
+                  >
+                    <span className="dash-badge-icon">{game.icon}</span>
+                    {myAttempted && <span className="dash-badge-check">✓</span>}
+                  </button>
 
                   {/* Player 2 Right Side */}
                   <div className="dash-card-half p2">
-                    <span className="dash-side-player-name">{p2Member?.displayName || 'P2'}</span>
                     <span
                       className={`dash-status-pill ${
                         p2Attempted ? 'attempted' : 'not-attempted'

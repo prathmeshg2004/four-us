@@ -27,7 +27,7 @@ export default function TutorialModal({ onClose }: TutorialModalProps) {
             <div className="tutorial-item-text">
               <span className="tutorial-item-title">4 Daily Challenges</span>
               <span className="tutorial-item-desc">
-                Play Five Letter, Mini Sudoku, Word Grid, and Know Me every day. Both players receive the exact same puzzles!
+                Play Wordle, Mini Sudoku, Word Grid, and Guess It every day. Both players receive the exact same puzzles!
               </span>
             </div>
           </div>

@@ -307,7 +307,7 @@ export default function FiveLetterGame({ roomId, dayNumber, onComplete }: FiveLe
   return (
     <div className="five-letter-game">
       <div className="fl-header">
-        <h3 className="fl-title">Five Letter</h3>
+        <h3 className="fl-title">Wordle</h3>
         <div className="fl-timer">{formatTimer(elapsedMs)}</div>
       </div>
 

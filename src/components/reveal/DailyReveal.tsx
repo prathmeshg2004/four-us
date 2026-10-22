@@ -19,10 +19,10 @@ interface DailyRevealProps {
 }
 
 const GAME_SEQUENCE = [
-  { key: 'fiveLetter', name: 'Five Letter', icon: '🟩' },
+  { key: 'fiveLetter', name: 'Wordle', icon: '🔠' },
   { key: 'sudoku', name: 'Mini Sudoku', icon: '🔢' },
   { key: 'wordGrid', name: 'Word Grid', icon: '🔤' },
-  { key: 'knowMe', name: 'Know Me', icon: '💡' },
+  { key: 'knowMe', name: 'Guess It', icon: '💭' },
 ] as const;
 
 export default function DailyReveal({
@@ -111,8 +111,8 @@ export default function DailyReveal({
             /* Game 1: Five Letter */
             <>
               <div className="reveal-game-badge">Game 1 of 4</div>
-              <div className="reveal-icon-big">🟩</div>
-              <div className="reveal-game-title">Five Letter</div>
+              <div className="reveal-icon-big">🔠</div>
+              <div className="reveal-game-title">Wordle</div>
               <div className="reveal-comparison-card">
                 {/* P1 */}
                 <div
@@ -246,8 +246,8 @@ export default function DailyReveal({
             /* Game 4: Know Me */
             <>
               <div className="reveal-game-badge">Game 4 of 4</div>
-              <div className="reveal-icon-big">💡</div>
-              <div className="reveal-game-title">Know Me</div>
+              <div className="reveal-icon-big">💭</div>
+              <div className="reveal-game-title">Guess It</div>
               <div className="reveal-knowme-box">
                 <div className="reveal-knowme-row">
                   <strong>{p1Member.displayName}'s Answer:</strong>

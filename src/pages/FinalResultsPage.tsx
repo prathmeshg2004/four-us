@@ -119,7 +119,7 @@ export default function FinalResultsPage({
       <div className="final-stats-card">
         <div className="final-stats-title">Performance By Game</div>
         <div className="final-stat-row">
-          <span className="final-stat-label">🟩 Five Letter Wins</span>
+          <span className="final-stat-label">🔠 Wordle Wins</span>
           <div className="final-stat-values">
             <span>{p1FiveLetterWins}</span>
             <span style={{ color: '#94a3b8' }}>-</span>
@@ -143,7 +143,7 @@ export default function FinalResultsPage({
           </div>
         </div>
         <div className="final-stat-row">
-          <span className="final-stat-label">💡 Know Me Matches</span>
+          <span className="final-stat-label">💭 Guess It Matches</span>
           <div className="final-stat-values">
             <span>{p1KnowMePoints}</span>
             <span style={{ color: '#94a3b8' }}>-</span>

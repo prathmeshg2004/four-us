@@ -144,8 +144,8 @@
   /* Split background on the container */
   background: linear-gradient(
     to right,
-    var(--dash-p1-bg, rgba(255, 107, 107, 0.06)) 50%,
-    var(--dash-p2-bg, rgba(78, 205, 196, 0.06)) 50%
+    var(--dash-p1-bg, rgba(255, 107, 107, 0.08)) 50%,
+    var(--dash-p2-bg, rgba(78, 205, 196, 0.08)) 50%
   );
 }
 
@@ -178,53 +178,30 @@
   box-shadow: var(--shadow-md);
 }
 
-.dash-game-header {
+/* Centered Game Name Header */
+.dash-game-center-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
+  justify-content: center;
+  padding: 10px 14px 6px;
   background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .dash-game-name {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--text-primary);
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 
-.dash-game-play-btn {
-  border: none;
-  border-radius: 16px;
-  padding: 6px 14px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  background: #667eea;
-  color: white;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.25);
-  transition: all 0.15s ease;
-  min-height: 36px;
-  touch-action: manipulation;
-}
-
-.dash-game-play-btn:active {
-  transform: scale(0.95);
-}
-
-.dash-game-play-btn.done {
-  background: #f1f5f9;
-  color: #64748b;
-  box-shadow: none;
-  cursor: default;
-}
-
-/* Split Card Body with Center Logo */
+/* Split Card Body with Center Clickable Logo */
 .dash-card-split-body {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 80px;
+  min-height: 84px;
+  align-items: center;
 }
 
 /* Split Background on Card Halves */
@@ -234,66 +211,107 @@
   justify-content: center;
   padding: 14px 16px;
   box-sizing: border-box;
+  min-height: 76px;
 }
 
 .dash-card-half.p1 {
   background: var(--dash-p1-bg, rgba(255, 107, 107, 0.08));
   border-right: 1px solid var(--border-color);
   align-items: flex-start;
-  padding-right: 32px;
+  padding-right: 36px;
 }
 
 .dash-card-half.p2 {
   background: var(--dash-p2-bg, rgba(78, 205, 196, 0.08));
   align-items: flex-end;
   text-align: right;
-  padding-left: 32px;
-}
-
-.dash-side-player-name {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
+  padding-left: 36px;
 }
 
 .dash-status-pill {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 14px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .dash-status-pill.attempted {
   background: #dcfce7;
   color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
 .dash-status-pill.not-attempted {
   background: #f1f5f9;
   color: #64748b;
+  border: 1px solid #e2e8f0;
 }
 
-/* Center Logo Badge sitting directly on the line */
+/* Center Clickable Logo Badge sitting directly on the line */
 .dash-card-center-badge {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: white;
-  border: 2px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 3px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
   z-index: 10;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dash-card-center-badge.clickable:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  border-color: #667eea;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+}
+
+.dash-card-center-badge.clickable:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.dash-card-center-badge.completed {
+  background: #f8fafc;
+  border-color: #22c55e;
+  cursor: default;
+}
+
+.dash-badge-icon {
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-badge-check {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: #22c55e;
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
 }
 
 /* Outcome Banner when both have attempted */
