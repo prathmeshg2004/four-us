@@ -16,7 +16,12 @@ interface CountdownResult {
 }
 
 export function useCountdown(targetTimestamp: Timestamp | null): CountdownResult {
-  const [remaining, setRemaining] = useState<number>(0);
+  const getInitialRemaining = () => {
+    if (!targetTimestamp) return 0;
+    return Math.max(0, targetTimestamp.toMillis() - Date.now());
+  };
+
+  const [remaining, setRemaining] = useState<number>(getInitialRemaining);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -41,6 +46,8 @@ export function useCountdown(targetTimestamp: Timestamp | null): CountdownResult
     };
   }, [targetTimestamp]);
 
+  const isExpired = Boolean(targetTimestamp && Date.now() >= targetTimestamp.toMillis());
+
   const totalSeconds = Math.floor(remaining / 1000);
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
@@ -51,7 +58,7 @@ export function useCountdown(targetTimestamp: Timestamp | null): CountdownResult
 
   let formatted: string;
   if (days > 0) {
-    formatted = `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    formatted = `${days}d ${pad(hours)}h ${pad(minutes)}m`;
   } else {
     formatted = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   }
@@ -62,7 +69,7 @@ export function useCountdown(targetTimestamp: Timestamp | null): CountdownResult
     minutes,
     seconds,
     totalMs: remaining,
-    isExpired: remaining <= 0,
+    isExpired,
     formatted,
   };
 }

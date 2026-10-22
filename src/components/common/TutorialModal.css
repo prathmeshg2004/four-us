@@ -1,0 +1,108 @@
+/* ============================================================
+   Tutorial Modal Styles
+   ============================================================ */
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.tutorial-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  max-width: 400px;
+  width: 100%;
+  padding: 24px 20px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideUp 0.3s ease-out;
+}
+
+.tutorial-header {
+  text-align: center;
+}
+
+.tutorial-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.tutorial-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.tutorial-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.tutorial-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.tutorial-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.tutorial-item-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tutorial-item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.tutorial-item-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tutorial-item-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.tutorial-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  min-height: 48px;
+  width: 100%;
+}
+
+.tutorial-btn:active {
+  transform: scale(0.97);
+}

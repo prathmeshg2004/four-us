@@ -323,14 +323,31 @@ export default function DailyReveal({
 
         {/* Footer Navigation */}
         <div className="reveal-footer">
-          <div className="reveal-dots">
-            {[0, 1, 2, 3, 4].map((step) => (
-              <div
-                key={step}
-                className={`reveal-dot ${step === currentStep ? 'active' : ''}`}
-              />
-            ))}
-          </div>
+          {currentStep < 4 ? (
+            <button
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '6px 8px',
+              }}
+              onClick={() => setCurrentStep(4)}
+            >
+              ⏩ Skip to Total
+            </button>
+          ) : (
+            <div className="reveal-dots">
+              {[0, 1, 2, 3, 4].map((step) => (
+                <div
+                  key={step}
+                  className={`reveal-dot ${step === currentStep ? 'active' : ''}`}
+                />
+              ))}
+            </div>
+          )}
           <button className="reveal-next-btn" onClick={handleNext}>
             {currentStep < 4 ? 'Next Game →' : 'Continue to Dashboard'}
           </button>

@@ -19,6 +19,7 @@ import MiniSudokuGame from '../components/games/mini-sudoku/MiniSudokuGame';
 import WordGridGame from '../components/games/word-grid/WordGridGame';
 import KnowMeGame from '../components/games/know-me/KnowMeGame';
 import DailyReveal from '../components/reveal/DailyReveal';
+import TutorialModal from '../components/common/TutorialModal';
 import FinalResultsPage from './FinalResultsPage';
 import './DashboardPage.css';
 
@@ -50,14 +51,12 @@ export default function DashboardPage({
   // Subscribe to current day statuses
   const statuses = useDayStatuses(roomId, currentDay);
 
-  // Active game modal state
+  // Modal states
   const [activeGame, setActiveGame] = useState<GameType | null>(null);
-
-  // Daily reveal modal state
   const [revealDayNumber, setRevealDayNumber] = useState<number | null>(null);
-
-  // History tab view
   const [showHistory, setShowHistory] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [skippingDay, setSkippingDay] = useState(false);
 
   // Players
   const p1Id = room.player1Id;
@@ -65,10 +64,7 @@ export default function DashboardPage({
   const p1Member = p1Id ? members[p1Id] : null;
   const p2Member = p2Id ? members[p2Id] : null;
 
-  const isPlayer1 = currentUserId === p1Id;
   const myStatus = statuses[currentUserId];
-  const partnerId = isPlayer1 ? p2Id : p1Id;
-  const partnerStatus = partnerId ? statuses[partnerId] : null;
 
   // Countdown to next daily reveal
   const nextRevealCountdown = useCountdown(currentDayRecord?.endsAt || null);
@@ -77,14 +73,31 @@ export default function DashboardPage({
   const finalDayRecord = days[10];
   const overallCountdown = useCountdown(finalDayRecord?.endsAt || null);
 
-  // Rollover check: if current day's round has expired, trigger finalization!
+  // Show tutorial on first game start
   useEffect(() => {
-    if (nextRevealCountdown.isExpired && currentDayRecord && !currentDayRecord.finalized) {
+    const tutorialSeen = localStorage.getItem('fourUs_tutorial_seen');
+    if (!tutorialSeen) {
+      setShowTutorial(true);
+    }
+  }, []);
+
+  const handleCloseTutorial = () => {
+    localStorage.setItem('fourUs_tutorial_seen', 'true');
+    setShowTutorial(false);
+  };
+
+  // Safe rollover check: only finalize if endsAt exists and has strictly passed in real-time
+  useEffect(() => {
+    if (
+      currentDayRecord?.endsAt &&
+      Date.now() >= currentDayRecord.endsAt.toMillis() &&
+      !currentDayRecord.finalized
+    ) {
       finalizeDayInFirestore(roomId, currentDay).then(() => {
         setRevealDayNumber(currentDay);
       });
     }
-  }, [nextRevealCountdown.isExpired, currentDayRecord, roomId, currentDay]);
+  }, [currentDayRecord, roomId, currentDay]);
 
   // Check if previous day was finalized and needs a reveal presentation
   useEffect(() => {
@@ -97,6 +110,20 @@ export default function DashboardPage({
       }
     }
   }, [currentDay, days, roomId]);
+
+  // Temporary Skip Day function
+  const handleSkipDay = async () => {
+    if (skippingDay) return;
+    setSkippingDay(true);
+    try {
+      await finalizeDayInFirestore(roomId, currentDay);
+      setRevealDayNumber(currentDay);
+    } catch (err) {
+      console.error('Failed to advance day:', err);
+    } finally {
+      setSkippingDay(false);
+    }
+  };
 
   // If room is completely finished (all 10 days finalized)
   if (room.status === 'finished' || (currentDay >= 10 && currentDayRecord?.finalized)) {
@@ -130,7 +157,15 @@ export default function DashboardPage({
   const p2Color = p2Member ? PLAYER_COLORS[p2Member.color] : '#4ECDC4';
 
   return (
-    <div className="dashboard-page animate-fade-in">
+    <div
+      className="dashboard-page animate-fade-in"
+      style={
+        {
+          '--dash-p1-bg': `${p1Color}15`,
+          '--dash-p2-bg': `${p2Color}15`,
+        } as React.CSSProperties
+      }
+    >
       {/* Sticky Top Score Bar */}
       <div className="dash-sticky-top">
         {/* Player 1 Side */}
@@ -177,7 +212,12 @@ export default function DashboardPage({
 
       {/* Timers Bar */}
       <div className="dash-timer-bar">
-        <span className="dash-day-badge">Day {currentDay} of 10</span>
+        <div className="dash-day-badge-group">
+          <span className="dash-day-badge">Day {currentDay} of 10</span>
+          <button className="dash-help-btn" onClick={() => setShowTutorial(true)}>
+            ℹ️ Rules
+          </button>
+        </div>
         <div className="dash-timers-right">
           <div className="dash-timer-item">
             Reveal: <span>{nextRevealCountdown.formatted}</span>
@@ -246,15 +286,43 @@ export default function DashboardPage({
             const p1Attempted = isGameAttempted(statuses[p1Id], game.id);
             const p2Attempted = isGameAttempted(p2Id ? statuses[p2Id] : undefined, game.id);
             const myAttempted = isGameAttempted(myStatus, game.id);
+            const bothAttempted = Boolean(p1Attempted && p2Attempted);
+
+            // Determine if winner information can be displayed
+            const daySummary = currentDayRecord?.resultSummary;
+            let outcomeText: string | null = null;
+
+            if (daySummary) {
+              const res = daySummary[game.id];
+              if (game.id === 'knowMe') {
+                const km = daySummary.knowMe;
+                if (km.player1Point && km.player2Point) {
+                  outcomeText = '🎉 Both predicted correctly! (+1 each)';
+                } else if (km.player1Point) {
+                  outcomeText = `🎉 ${p1Member?.displayName} predicted correctly (+1 pt)`;
+                } else if (km.player2Point) {
+                  outcomeText = `🎉 ${p2Member?.displayName} predicted correctly (+1 pt)`;
+                } else {
+                  outcomeText = 'No predictions matched';
+                }
+              } else if (res && 'winnerId' in res) {
+                if (res.winnerId === p1Id) {
+                  outcomeText = `🏆 ${p1Member?.displayName} won (+1 pt)`;
+                } else if (res.winnerId === p2Id) {
+                  outcomeText = `🏆 ${p2Member?.displayName} won (+1 pt)`;
+                } else {
+                  outcomeText = '🤝 Tied / No point awarded';
+                }
+              }
+            } else if (bothAttempted) {
+              outcomeText = '✨ Both players have submitted! Points reveal at rollover.';
+            }
 
             return (
               <div key={game.id} className="dash-game-card">
                 {/* Game Title Bar */}
                 <div className="dash-game-header">
-                  <div className="dash-game-title-group">
-                    <span className="dash-game-icon">{game.icon}</span>
-                    <span className="dash-game-name">{game.name}</span>
-                  </div>
+                  <span className="dash-game-name">{game.name}</span>
                   <button
                     className={`dash-game-play-btn ${myAttempted ? 'done' : ''}`}
                     disabled={myAttempted}
@@ -264,43 +332,66 @@ export default function DashboardPage({
                   </button>
                 </div>
 
-                {/* Split Status Row */}
-                <div className="dash-card-split-row">
-                  {/* Player 1 Status Side */}
-                  <div className="dash-card-side">
+                {/* Split Card Body with Center Logo */}
+                <div className="dash-card-split-body">
+                  {/* Player 1 Left Side */}
+                  <div className="dash-card-half p1">
+                    <span className="dash-side-player-name">{p1Member?.displayName || 'P1'}</span>
                     <span
-                      className={`dash-status-dot ${
+                      className={`dash-status-pill ${
                         p1Attempted ? 'attempted' : 'not-attempted'
                       }`}
-                    />
-                    <span
-                      className={`dash-status-label ${
-                        p1Attempted ? 'attempted' : ''
-                      }`}
                     >
-                      {p1Attempted ? 'Attempted' : 'Not attempted'}
+                      {p1Attempted ? '✓ Attempted' : '⏳ Waiting'}
                     </span>
                   </div>
 
-                  {/* Player 2 Status Side */}
-                  <div className="dash-card-side player2">
+                  {/* Center Logo Badge directly on divider */}
+                  <div className="dash-card-center-badge">
+                    <span>{game.icon}</span>
+                  </div>
+
+                  {/* Player 2 Right Side */}
+                  <div className="dash-card-half p2">
+                    <span className="dash-side-player-name">{p2Member?.displayName || 'P2'}</span>
                     <span
-                      className={`dash-status-dot ${
+                      className={`dash-status-pill ${
                         p2Attempted ? 'attempted' : 'not-attempted'
                       }`}
-                    />
-                    <span
-                      className={`dash-status-label ${
-                        p2Attempted ? 'attempted' : ''
-                      }`}
                     >
-                      {p2Attempted ? 'Attempted' : 'Not attempted'}
+                      {p2Attempted ? '✓ Attempted' : '⏳ Waiting'}
                     </span>
                   </div>
                 </div>
+
+                {/* Score / Winner outcome banner */}
+                {outcomeText && (
+                  <div className={`dash-card-outcome ${daySummary ? 'revealed' : ''}`}>
+                    {outcomeText}
+                  </div>
+                )}
               </div>
             );
           })}
+
+          {/* Temporary Admin Testing Skip Button */}
+          <div className="dash-admin-card">
+            <div className="dash-admin-header">
+              <span>🛠️ Testing Controls</span>
+              <span className="dash-admin-tag">Temporary</span>
+            </div>
+            <p className="dash-admin-desc">
+              Test day completion, scoring calculations, and unlock the next round instantly:
+            </p>
+            <button
+              className="btn btn-secondary btn-full"
+              style={{ background: '#f8fafc', borderColor: '#cbd5e1', fontWeight: 700 }}
+              disabled={skippingDay}
+              onClick={handleSkipDay}
+            >
+              {skippingDay ? '⏳ Finalizing Day...' : `⏩ Skip to Day ${currentDay + 1}`}
+            </button>
+          </div>
         </div>
       )}
 
@@ -321,6 +412,9 @@ export default function DashboardPage({
           <span>History</span>
         </button>
       </div>
+
+      {/* Tutorial Popup Modal */}
+      {showTutorial && <TutorialModal onClose={handleCloseTutorial} />}
 
       {/* Active Game Modal Drawer */}
       {activeGame && (
