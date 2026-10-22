@@ -1,0 +1,366 @@
+/* ============================================================
+   Know Me — Game Styles
+   ============================================================ */
+
+.knowme-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 16px;
+  font-family: inherit;
+  color: #2d2d2d;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* --- Step Indicator --- */
+
+.knowme-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.knowme-step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e0d6cc;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.knowme-step-dot.active {
+  background: #f97068;
+  transform: scale(1.3);
+}
+
+.knowme-step-dot.completed {
+  background: #4ecdc4;
+}
+
+.knowme-step-label {
+  font-size: 13px;
+  color: #8a7f75;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* --- Card Container --- */
+
+.knowme-card {
+  background: #fffaf5;
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  animation: knowme-fadeIn 0.35s ease-out;
+}
+
+@keyframes knowme-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Prompt Question --- */
+
+.knowme-prompt-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #f97068;
+  margin-bottom: 8px;
+}
+
+.knowme-prompt-text {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #3a3330;
+  margin: 0 0 24px 0;
+}
+
+/* --- Options Grid --- */
+
+.knowme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.knowme-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid #ede5dd;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.knowme-option:active {
+  transform: scale(0.98);
+}
+
+.knowme-option.selected {
+  border-color: #f97068;
+  background: #fff0ee;
+  box-shadow: 0 2px 12px rgba(249, 112, 104, 0.15);
+}
+
+.knowme-option.prediction.selected {
+  border-color: #4ecdc4;
+  background: #edfbfa;
+  box-shadow: 0 2px 12px rgba(78, 205, 196, 0.15);
+}
+
+.knowme-option.disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.knowme-option-letter {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #8a7f75;
+  background: #f3ede6;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.knowme-option.selected .knowme-option-letter {
+  background: #f97068;
+  color: #fff;
+}
+
+.knowme-option.prediction.selected .knowme-option-letter {
+  background: #4ecdc4;
+  color: #fff;
+}
+
+.knowme-option-text {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #3a3330;
+}
+
+/* --- Next / Lock In Button --- */
+
+.knowme-next-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 52px;
+}
+
+.knowme-next-btn.primary {
+  background: #f97068;
+  color: #fff;
+}
+
+.knowme-next-btn.primary:active {
+  background: #e85d55;
+  transform: scale(0.98);
+}
+
+.knowme-next-btn.lockin {
+  background: linear-gradient(135deg, #f97068, #f7b731);
+  color: #fff;
+}
+
+.knowme-next-btn.lockin:active {
+  transform: scale(0.98);
+}
+
+.knowme-next-btn:disabled {
+  background: #e0d6cc;
+  color: #b3a99e;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- Confirmation Screen (Step 3) --- */
+
+.knowme-confirm-section {
+  margin-bottom: 20px;
+}
+
+.knowme-confirm-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.knowme-confirm-label.own {
+  color: #f97068;
+}
+
+.knowme-confirm-label.prediction {
+  color: #4ecdc4;
+}
+
+.knowme-confirm-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 2px solid #ede5dd;
+}
+
+.knowme-confirm-choice.own {
+  border-color: #f97068;
+  background: #fff0ee;
+}
+
+.knowme-confirm-choice.prediction {
+  border-color: #4ecdc4;
+  background: #edfbfa;
+}
+
+.knowme-confirm-letter {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.knowme-confirm-letter.own {
+  background: #f97068;
+}
+
+.knowme-confirm-letter.prediction {
+  background: #4ecdc4;
+}
+
+.knowme-confirm-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: #3a3330;
+  line-height: 1.35;
+}
+
+.knowme-divider {
+  height: 1px;
+  background: #ede5dd;
+  margin: 16px 0;
+}
+
+/* --- Completion Screen --- */
+
+.knowme-complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  animation: knowme-fadeIn 0.35s ease-out;
+}
+
+.knowme-complete-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.knowme-complete-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3a3330;
+  margin: 0 0 8px 0;
+}
+
+.knowme-complete-subtitle {
+  font-size: 14px;
+  color: #8a7f75;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* --- Loading --- */
+
+.knowme-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 60px 20px;
+  color: #8a7f75;
+  font-size: 15px;
+}
+
+.knowme-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #ede5dd;
+  border-top-color: #f97068;
+  border-radius: 50%;
+  animation: knowme-spin 0.7s linear infinite;
+}
+
+@keyframes knowme-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Error --- */
+
+.knowme-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #e85d55;
+  font-size: 15px;
+}
+
+.knowme-error-retry {
+  margin-top: 16px;
+  padding: 12px 24px;
+  border: 2px solid #f97068;
+  border-radius: 12px;
+  background: transparent;
+  color: #f97068;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}

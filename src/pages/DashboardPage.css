@@ -1,0 +1,331 @@
+/* ============================================================
+   Dashboard Page — Split-View Mobile Styles
+   ============================================================ */
+
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 440px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background-color: var(--bg-primary);
+  position: relative;
+}
+
+/* Sticky Top Bar */
+.dash-sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: white;
+  border-bottom: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.dash-player-score-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-player-score-box.player2 {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.dash-avatar-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.dash-player-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dash-player-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.dash-player-score {
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.dash-vs-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+/* Timer Area */
+.dash-timer-bar {
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dash-day-badge {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #1e293b;
+  background: #e2e8f0;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+}
+
+.dash-timers-right {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dash-timer-item span {
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
+}
+
+/* Split Board & Cards */
+.dash-board-container {
+  flex: 1;
+  padding: 16px 12px 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Center vertical divider connecting cards */
+.dash-center-line {
+  position: absolute;
+  top: 10px;
+  bottom: 20px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* Game Card */
+.dash-game-card {
+  position: relative;
+  z-index: 2;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dash-game-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.dash-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #fcfcfd;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dash-game-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-game-icon {
+  font-size: 1.3rem;
+}
+
+.dash-game-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dash-game-play-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #667eea;
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.25);
+  transition: all 0.15s ease;
+  min-height: 36px;
+  touch-action: manipulation;
+}
+
+.dash-game-play-btn:active {
+  transform: scale(0.95);
+}
+
+.dash-game-play-btn.done {
+  background: #f1f5f9;
+  color: #64748b;
+  box-shadow: none;
+  cursor: default;
+}
+
+/* Split Status Row on the Card */
+.dash-card-split-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 8px 12px;
+  position: relative;
+}
+
+.dash-card-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.dash-card-side.player2 {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.dash-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dash-status-dot.attempted {
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.dash-status-dot.not-attempted {
+  background: #cbd5e1;
+}
+
+.dash-status-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dash-status-label.attempted {
+  color: #15803d;
+}
+
+/* Bottom Bar / Navigation */
+.dash-bottom-nav {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid var(--border-color);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0));
+  display: flex;
+  justify-content: space-around;
+  z-index: 40;
+}
+
+.dash-nav-btn {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 8px;
+}
+
+.dash-nav-btn.active {
+  color: #667eea;
+}
+
+/* Game Modal View */
+.dash-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.dash-modal-content {
+  background: white;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-height: 94dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  animation: slideUp 0.3s ease-out;
+}
+
+.dash-modal-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+.dash-modal-close-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+}

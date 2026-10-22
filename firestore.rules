@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isRoomMember(roomId) {
+      let room = get(/databases/$(database)/documents/rooms/$(roomId)).data;
+      return isAuthenticated() && (
+        request.auth.uid == room.player1Id ||
+        request.auth.uid == room.player2Id
+      );
+    }
+
+    // Rooms collection
+    match /rooms/{roomId} {
+      allow read: if isAuthenticated();
+      // Allow creation
+      allow create: if isAuthenticated() && request.resource.data.player1Id == request.auth.uid;
+      // Allow joining as player 2 or updating status/scores
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.player1Id ||
+        request.auth.uid == resource.data.player2Id ||
+        resource.data.player2Id == null
+      );
+
+      // Members subcollection
+      match /members/{memberId} {
+        allow read: if isRoomMember(roomId);
+        allow write: if isAuthenticated() && request.auth.uid == memberId;
+      }
+
+      // Day records subcollection
+      match /days/{dayId} {
+        allow read: if isRoomMember(roomId);
+        allow write: if isRoomMember(roomId);
+
+        // Public statuses subcollection (booleans only)
+        match /statuses/{playerId} {
+          allow read: if isRoomMember(roomId);
+          allow write: if isAuthenticated() && request.auth.uid == playerId;
+        }
+
+        // Private attempts subcollection
+        match /attempts/{playerId} {
+          // Player can always read their own attempt.
+          // Opponent can ONLY read after day has finalized.
+          allow read: if isAuthenticated() && (
+            request.auth.uid == playerId ||
+            get(/databases/$(database)/documents/rooms/$(roomId)/days/$(dayId)).data.finalized == true
+          );
+
+          // Player can only write their own attempt doc
+          allow create, update: if isAuthenticated() && request.auth.uid == playerId;
+        }
+
+        // Progress subcollection (in-progress game state)
+        match /progress/{playerId} {
+          allow read, write: if isAuthenticated() && request.auth.uid == playerId;
+        }
+      }
+    }
+  }
+}

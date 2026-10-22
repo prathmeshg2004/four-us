@@ -1,0 +1,204 @@
+/* ============================================================
+   Lobby Page Styles
+   ============================================================ */
+
+.lobby-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  justify-content: space-between;
+}
+
+.lobby-header {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.lobby-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.lobby-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* Room Code Card */
+.lobby-code-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin: 20px 0;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.lobby-code-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.lobby-code-val {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #1A1A2E;
+  margin-bottom: 12px;
+}
+
+.lobby-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lobby-copy-btn:active {
+  transform: scale(0.95);
+}
+
+/* Players Split / Comparison */
+.lobby-players-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.lobby-player-card {
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.lobby-player-card.is-me {
+  border-color: #667eea;
+}
+
+.lobby-player-avatar {
+  font-size: 2.5rem;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border: 3px solid;
+}
+
+.lobby-player-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lobby-player-role {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.lobby-player-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.lobby-player-status.ready {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.lobby-player-status.not-ready {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.lobby-waiting-card {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius-lg);
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.lobby-waiting-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.lobby-waiting-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Actions footer */
+.lobby-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.lobby-start-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: white;
+  animation: fadeIn 0.3s ease;
+}
+
+.lobby-countdown-num {
+  font-size: 5rem;
+  font-weight: 900;
+  animation: pulse 1s infinite;
+}

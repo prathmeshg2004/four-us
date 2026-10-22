@@ -1,0 +1,446 @@
+/* ============================================================
+   Mini Sudoku — Styles
+   6×6 grid with 2×3 subgrid borders, mobile-first design
+   ============================================================ */
+
+/* ---------- Container ---------- */
+.sudoku-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- Header ---------- */
+.sudoku-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.sudoku-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.sudoku-timer {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #1a1a2e;
+  min-width: 56px;
+  text-align: center;
+}
+
+.sudoku-timer.warning {
+  color: #ef4444;
+  animation: pulse-red 1s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ---------- Grid ---------- */
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  border: 3px solid #1a1a2e;
+  border-radius: 6px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 330px;
+  aspect-ratio: 1;
+  margin-bottom: 16px;
+  background: #1a1a2e;
+  gap: 1px;
+}
+
+/* ---------- Cell ---------- */
+.sudoku-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  font-size: 22px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.15s ease;
+  min-height: 44px;
+}
+
+.sudoku-cell:active {
+  background: #e2e8f0;
+}
+
+/* Thicker borders for 2×3 subgrid boundaries */
+.sudoku-cell.border-right {
+  border-right: 2px solid #1a1a2e;
+}
+
+.sudoku-cell.border-bottom {
+  border-bottom: 2px solid #1a1a2e;
+}
+
+/* Given (pre-filled) cells */
+.sudoku-cell.given {
+  background: #f1f5f9;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: default;
+}
+
+/* Selected cell */
+.sudoku-cell.selected {
+  background: #dbeafe;
+  box-shadow: inset 0 0 0 2px #3b82f6;
+}
+
+/* Highlighted row/col/box */
+.sudoku-cell.highlighted {
+  background: #f0f4ff;
+}
+
+/* Same number highlight */
+.sudoku-cell.same-number {
+  background: #c7d2fe;
+}
+
+/* Error / duplicate cell */
+.sudoku-cell.error {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.sudoku-cell.error.selected {
+  background: #fecaca;
+  box-shadow: inset 0 0 0 2px #dc2626;
+}
+
+/* User-entered value */
+.sudoku-cell.user-entered {
+  color: #2563eb;
+}
+
+/* ---------- Notes ---------- */
+.sudoku-notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+}
+
+.sudoku-note-digit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1;
+}
+
+/* ---------- Controls ---------- */
+.sudoku-controls {
+  width: 100%;
+  max-width: 330px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Number buttons row */
+.sudoku-number-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.sudoku-number-btn {
+  width: 46px;
+  height: 46px;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sudoku-number-btn:active {
+  transform: scale(0.93);
+}
+
+.sudoku-number-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.sudoku-number-btn.completed {
+  opacity: 0.35;
+}
+
+/* Action buttons row */
+.sudoku-action-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.sudoku-action-btn {
+  flex: 1;
+  max-width: 120px;
+  height: 44px;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.sudoku-action-btn:active {
+  transform: scale(0.95);
+}
+
+.sudoku-action-btn.notes-active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+/* ---------- Check / Submit ---------- */
+.sudoku-check-btn {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.15s ease;
+}
+
+.sudoku-check-btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.sudoku-check-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Feedback messages ---------- */
+.sudoku-feedback {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 0;
+  min-height: 30px;
+}
+
+.sudoku-feedback.error {
+  color: #dc2626;
+}
+
+.sudoku-feedback.info {
+  color: #2563eb;
+}
+
+/* ---------- Start screen ---------- */
+.sudoku-start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.sudoku-start-screen h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.sudoku-start-screen p {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0 0 6px 0;
+  line-height: 1.5;
+}
+
+.sudoku-start-screen .rules {
+  text-align: left;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin: 16px 0 24px;
+  width: 100%;
+}
+
+.sudoku-start-screen .rules li {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.sudoku-start-screen .rules li:last-child {
+  margin-bottom: 0;
+}
+
+.sudoku-start-btn {
+  width: 100%;
+  max-width: 280px;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sudoku-start-btn:active {
+  transform: scale(0.96);
+}
+
+/* ---------- Completion screen ---------- */
+.sudoku-complete-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.sudoku-complete-screen .icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.sudoku-complete-screen h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+}
+
+.sudoku-complete-screen p {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0 0 4px 0;
+  line-height: 1.5;
+}
+
+.sudoku-complete-screen .stats {
+  display: flex;
+  gap: 24px;
+  margin: 20px 0;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.sudoku-complete-screen .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sudoku-complete-screen .stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.sudoku-complete-screen .stat-label {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sudoku-complete-screen .reveal-note {
+  font-size: 14px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f0f4ff;
+  border-radius: 10px;
+  line-height: 1.4;
+}
+
+/* ---------- Loading ---------- */
+.sudoku-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  font-size: 16px;
+  color: #64748b;
+}
+
+/* ---------- Penalty flash ---------- */
+.penalty-flash {
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 700;
+  animation: fade-up 1.5s ease-out forwards;
+  position: absolute;
+  top: -8px;
+  right: 0;
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}

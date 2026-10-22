@@ -1,0 +1,234 @@
+/* ============================================================
+   Daily Reveal — Fixed Sequence Reveal Animation
+   ============================================================ */
+
+.reveal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.reveal-container {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Header & Day Tag */
+.reveal-header {
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.reveal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.reveal-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Score Tracker Bar During Reveal */
+.reveal-scores-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 16px;
+  background: #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.reveal-score-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reveal-player-chip {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.reveal-score-badge {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #1e293b;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Sequence Content */
+.reveal-content-body {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 280px;
+  justify-content: center;
+  text-align: center;
+}
+
+.reveal-game-badge {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #667eea;
+  background: #eef2ff;
+  padding: 4px 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.reveal-icon-big {
+  font-size: 3rem;
+  margin-bottom: 8px;
+  animation: pop 0.3s ease;
+}
+
+.reveal-game-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+/* Comparison Card */
+.reveal-comparison-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.reveal-player-col {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.reveal-player-col.is-winner {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+  transform: translateY(-2px);
+}
+
+.reveal-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.reveal-metric {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.reveal-metric-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.reveal-winner-pill {
+  position: absolute;
+  top: -10px;
+  background: #22c55e;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  animation: pop 0.2s ease;
+}
+
+/* Know Me Details */
+.reveal-knowme-box {
+  width: 100%;
+  text-align: left;
+  background: #f8fafc;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+
+.reveal-knowme-row {
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Footer / Stepper controls */
+.reveal-footer {
+  padding: 14px 20px;
+  background: white;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reveal-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.reveal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  transition: background 0.2s;
+}
+
+.reveal-dot.active {
+  background: #667eea;
+  width: 16px;
+  border-radius: 4px;
+}
+
+.reveal-next-btn {
+  border: none;
+  background: #667eea;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.reveal-next-btn:active {
+  transform: scale(0.96);
+}

@@ -1,0 +1,340 @@
+/* ============================================================
+   Five Letter Game — Styles
+   ============================================================ */
+
+/* --- Layout --- */
+.five-letter-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 8px;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- Header / Timer --- */
+.fl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.fl-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.fl-timer {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #555;
+  background: #f0f0f0;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* --- Start Button --- */
+.fl-start-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #6aaa64;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  border-radius: 28px;
+  padding: 14px 48px;
+  margin: 32px 0;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 48px;
+  box-shadow: 0 2px 8px rgba(106, 170, 100, 0.3);
+}
+.fl-start-btn:hover {
+  background: #5b9a55;
+}
+.fl-start-btn:active {
+  background: #4e8a48;
+  transform: scale(0.97);
+}
+
+/* --- Grid --- */
+.fl-grid {
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 5px;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 330px;
+}
+
+.fl-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+/* --- Tile --- */
+.fl-tile {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 6vw, 32px);
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 2px solid #d3d6da;
+  border-radius: 4px;
+  background: #fff;
+  color: #1a1a2e;
+  transition: border-color 0.1s;
+  box-sizing: border-box;
+}
+
+.fl-tile.filled {
+  border-color: #878a8c;
+  animation: pop 0.1s ease-in-out;
+}
+
+.fl-tile.correct {
+  background-color: #6aaa64;
+  border-color: #6aaa64;
+  color: #fff;
+}
+
+.fl-tile.present {
+  background-color: #c9b458;
+  border-color: #c9b458;
+  color: #fff;
+}
+
+.fl-tile.absent {
+  background-color: #787c7e;
+  border-color: #787c7e;
+  color: #fff;
+}
+
+/* --- Flip Animation --- */
+.fl-tile.reveal {
+  animation: flipIn 0.3s ease-in forwards;
+}
+
+@keyframes flipIn {
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+/* --- Pop on letter entry --- */
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* --- Shake Animation (invalid word) --- */
+.fl-row.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  10%  { transform: translateX(-8px); }
+  20%  { transform: translateX(8px); }
+  30%  { transform: translateX(-6px); }
+  40%  { transform: translateX(6px); }
+  50%  { transform: translateX(-4px); }
+  60%  { transform: translateX(4px); }
+  70%  { transform: translateX(-2px); }
+  80%  { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+/* --- Toast --- */
+.fl-toast-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  min-height: 28px;
+  margin-bottom: 4px;
+}
+
+.fl-toast {
+  position: absolute;
+  top: 0;
+  background: #1a1a2e;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 6px;
+  z-index: 10;
+  animation: fadeInOut 1.5s ease-in-out forwards;
+  white-space: nowrap;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateY(-8px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* --- Keyboard --- */
+.fl-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 500px;
+  padding: 0 2px;
+}
+
+.fl-kb-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.fl-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  min-width: 30px;
+  flex: 1;
+  max-width: 44px;
+  background: #d3d6da;
+  color: #1a1a2e;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fl-key:active {
+  opacity: 0.8;
+}
+
+.fl-key.wide {
+  max-width: 65px;
+  flex: 1.5;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.fl-key.correct {
+  background-color: #6aaa64;
+  color: #fff;
+}
+
+.fl-key.present {
+  background-color: #c9b458;
+  color: #fff;
+}
+
+.fl-key.absent {
+  background-color: #787c7e;
+  color: #fff;
+}
+
+/* --- Completion Screen --- */
+.fl-complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.fl-complete h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #1a1a2e;
+}
+
+.fl-complete-emoji {
+  font-size: 48px;
+}
+
+.fl-complete-stats {
+  display: flex;
+  gap: 24px;
+  margin: 8px 0;
+}
+
+.fl-complete-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fl-complete-stat .value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.fl-complete-stat .label {
+  font-size: 12px;
+  color: #787c7e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fl-complete-msg {
+  font-size: 14px;
+  color: #787c7e;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+/* --- Loading --- */
+.fl-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 0;
+  color: #787c7e;
+  font-size: 16px;
+}
+
+.fl-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #d3d6da;
+  border-top-color: #6aaa64;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
