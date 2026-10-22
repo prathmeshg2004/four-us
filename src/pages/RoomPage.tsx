@@ -17,6 +17,35 @@ export default function RoomPage() {
   const { user, loading: authLoading } = useAuth();
   const { room, members, days, loading: roomLoading } = useRoom(roomId || null);
 
+  // Two-player game authentication & 24-hour session values
+  const activePlayer = typeof window !== 'undefined' ? localStorage.getItem('fourUs_active_player') : null;
+  const loginTimeStr = typeof window !== 'undefined' ? localStorage.getItem('fourUs_login_time') : null;
+  const loginTime = loginTimeStr ? parseInt(loginTimeStr, 10) : 0;
+  const isSessionExpired = !loginTime || Date.now() - loginTime > 24 * 60 * 60 * 1000;
+
+  const effectiveUserId = (activePlayer === 'prathmesh' || activePlayer === 'vidhi')
+    ? activePlayer
+    : user?.uid || '';
+
+  // ALL hooks MUST run unconditionally at top level (React Rule of Hooks)
+  useEffect(() => {
+    if (activePlayer && isSessionExpired) {
+      localStorage.removeItem('fourUs_active_player');
+      localStorage.removeItem('fourUs_login_time');
+      navigate('/');
+      return;
+    }
+
+    if (effectiveUserId === 'prathmesh' || effectiveUserId === 'vidhi') {
+      recordAccessLog(effectiveUserId, 'visit');
+    }
+  }, [activePlayer, isSessionExpired, effectiveUserId, navigate]);
+
+  // Conditional rendering AFTER all hooks have executed:
+  if (activePlayer && isSessionExpired) {
+    return null;
+  }
+
   if (authLoading || roomLoading) {
     return (
       <div
@@ -66,30 +95,6 @@ export default function RoomPage() {
       </div>
     );
   }
-
-  // Two-player game authentication & 24-hour session check
-  const activePlayer = localStorage.getItem('fourUs_active_player');
-  const loginTimeStr = localStorage.getItem('fourUs_login_time');
-  const loginTime = loginTimeStr ? parseInt(loginTimeStr, 10) : 0;
-  const isSessionExpired = !loginTime || Date.now() - loginTime > 24 * 60 * 60 * 1000;
-
-  if (activePlayer && isSessionExpired) {
-    localStorage.removeItem('fourUs_active_player');
-    localStorage.removeItem('fourUs_login_time');
-    navigate('/');
-    return null;
-  }
-
-  const effectiveUserId = (activePlayer === 'prathmesh' || activePlayer === 'vidhi')
-    ? activePlayer
-    : user.uid;
-
-  // Automatically record access log (IP, location, device) on visit
-  useEffect(() => {
-    if (effectiveUserId === 'prathmesh' || effectiveUserId === 'vidhi') {
-      recordAccessLog(effectiveUserId, 'visit');
-    }
-  }, [effectiveUserId]);
 
   // Branch based on room status
   if (room.status === 'waiting' || room.status === 'lobby') {
