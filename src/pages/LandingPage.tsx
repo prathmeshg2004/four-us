@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ensureFixedTwoPlayerGame, verifyPlayerCode, FIXED_ROOM_ID } from '../lib/roomService';
 import { ensureAuth } from '../lib/firebase';
+import { recordAccessLog } from '../lib/tracking';
 import './LandingPage.css';
 
 export default function LandingPage() {
@@ -37,6 +38,7 @@ export default function LandingPage() {
           }
 
           await ensureFixedTwoPlayerGame();
+          recordAccessLog(savedPlayer, 'auto_login');
           navigate(`/room/${FIXED_ROOM_ID}`);
         }
       } catch (err) {
@@ -82,6 +84,7 @@ export default function LandingPage() {
       localStorage.setItem('fourUs_active_player', matchedPlayer);
       localStorage.setItem('fourUs_login_time', String(Date.now()));
       localStorage.setItem('fourUs_show_welcome', 'true');
+      recordAccessLog(matchedPlayer, 'login');
       navigate(`/room/${FIXED_ROOM_ID}`);
     } catch (err: unknown) {
       console.error('Login error:', err);

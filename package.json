@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "logs": "node scripts/get-logs.mjs"
   },
   "dependencies": {
     "firebase": "^13.1.0",
