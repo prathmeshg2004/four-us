@@ -25,7 +25,7 @@ interface WordGridGameProps {
   onComplete: () => void;
 }
 
-const TIME_LIMIT_MS = GAME_CONFIG.WORD_GRID_TIME_LIMIT_MS; // 120,000 ms (2 mins)
+const TIME_LIMIT_MS = GAME_CONFIG.WORD_GRID_TIME_LIMIT_MS; // 240,000 ms (4 mins)
 const TARGET_POINTS = GAME_CONFIG.WORD_GRID_TARGET_POINTS; // 10 points
 
 export default function WordGridGame({ roomId, dayNumber, onComplete }: WordGridGameProps) {
@@ -326,7 +326,7 @@ export default function WordGridGame({ roomId, dayNumber, onComplete }: WordGrid
         <div style={{ textAlign: 'center', margin: '24px 0' }}>
           <p style={{ color: '#64748b', marginBottom: '16px', fontSize: '0.95rem' }}>
             Connect adjacent letters (horizontal, vertical, diagonal) to form words.
-            Reach 10 word points before the 2-minute timer runs out!
+            Reach 10 word points before the 4-minute timer runs out!
           </p>
           <button className="btn btn-primary btn-large" onClick={handleStart}>
             Start Game

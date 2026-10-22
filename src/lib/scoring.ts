@@ -305,6 +305,15 @@ export async function finalizeDayInFirestore(roomId: string, dayNumber: number):
     const nextDay = dayNumber < 10 ? dayNumber + 1 : 10;
     const isFinished = dayNumber >= 10;
 
+    if (!isFinished) {
+      const nextDayRef = doc(db, 'rooms', roomId, 'days', String(nextDay));
+      const nowMs = Date.now();
+      transaction.update(nextDayRef, {
+        startsAt: Timestamp.fromMillis(nowMs),
+        endsAt: Timestamp.fromMillis(nowMs + 24 * 60 * 60 * 1000),
+      });
+    }
+
     transaction.update(roomRef, {
       player1Score: (room.player1Score || 0) + p1DayPoints,
       player2Score: (room.player2Score || 0) + p2DayPoints,

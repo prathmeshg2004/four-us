@@ -73,13 +73,36 @@ export default function DailyReveal({
     <div className="reveal-overlay">
       <div className="reveal-container animate-slide-up">
         {/* Header */}
-        <div className="reveal-header">
+        <div className="reveal-header" style={{ position: 'relative' }}>
           <div className="reveal-title">Day {dayNumber} Results</div>
           <div className="reveal-subtitle">
             {currentStep < 4
               ? `Game ${currentStep + 1} of 4: ${currentGame.name}`
               : 'Day Summary'}
           </div>
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              background: '#f1f5f9',
+              border: 'none',
+              borderRadius: '50%',
+              width: '28px',
+              height: '28px',
+              fontSize: '14px',
+              fontWeight: 700,
+              color: '#64748b',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            title="Close"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Live Running Scores Header */}

@@ -236,7 +236,92 @@
   color: #92400e;
 }
 
+/* ---------- Status Bar ---------- */
+.sudoku-status-bar {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
 /* ---------- Check / Submit ---------- */
+.sudoku-submit-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.sudoku-submit-btn {
+  flex: 2;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
+}
+
+.sudoku-submit-btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.sudoku-check-hint-btn {
+  flex: 1;
+  height: 48px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sudoku-check-hint-btn:active {
+  background: #e2e8f0;
+}
+
+/* ---------- Confirm Modal ---------- */
+.sudoku-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.sudoku-confirm-dialog {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: slide-up 0.2s ease-out;
+}
+
+.sudoku-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
 .sudoku-check-btn {
   width: 100%;
   height: 48px;

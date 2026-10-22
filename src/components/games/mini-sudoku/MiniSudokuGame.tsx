@@ -115,6 +115,7 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
   const [penaltyMs, setPenaltyMs] = useState(0);
   const [feedback, setFeedback] = useState<{ message: string; type: 'error' | 'info' } | null>(null);
   const [showPenalty, setShowPenalty] = useState(false);
+  const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
 
   // Timer state
   const [startedAtMs, setStartedAtMs] = useState<number | null>(null);
@@ -163,6 +164,16 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
       }
     }
     return true;
+  }, [grid]);
+
+  const emptyCellsCount = useMemo(() => {
+    let count = 0;
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (grid[r][c] === 0) count++;
+      }
+    }
+    return count;
   }, [grid]);
 
   // ---- Load puzzle & check for existing attempt ----
@@ -398,7 +409,7 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
     }).catch((err) => console.error('Failed to save initial progress:', err));
   }, [roomId, dayNumber, grid, notes]);
 
-  // ---- Cell selection ----
+  // ---- Cell selection (Tap cell to select; does NOT auto-insert preselected digits!) ----
 
   const handleCellClick = useCallback(
     (row: number, col: number) => {
@@ -411,17 +422,8 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
       }
 
       setSelectedCell([row, col]);
-
-      // If a digit is selected and this isn't a given cell, place it
-      if (selectedDigit !== null && !givenCells.has(`${row},${col}`)) {
-        if (notesMode) {
-          toggleNote(row, col, selectedDigit);
-        } else {
-          placeDigit(row, col, selectedDigit);
-        }
-      }
     },
-    [phase, selectedCell, selectedDigit, givenCells, notesMode]
+    [phase, selectedCell]
   );
 
   // ---- Digit placement ----
@@ -474,23 +476,19 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
     (digit: number) => {
       if (phase !== 'playing') return;
 
-      // Toggle digit selection
-      if (selectedDigit === digit) {
-        setSelectedDigit(null);
-      } else {
-        setSelectedDigit(digit);
-      }
-
-      // If a cell is selected and it's not a given, place/toggle the digit
+      // If a cell is selected and it's not a given clue, place or toggle the digit in that cell
       if (selectedCell && !givenCells.has(`${selectedCell[0]},${selectedCell[1]}`)) {
         if (notesMode) {
           toggleNote(selectedCell[0], selectedCell[1], digit);
         } else {
           placeDigit(selectedCell[0], selectedCell[1], digit);
         }
+      } else {
+        // No cell selected: toggle digit filter for board highlighting
+        setSelectedDigit((prev) => (prev === digit ? null : digit));
       }
     },
-    [phase, selectedDigit, selectedCell, givenCells, notesMode, placeDigit, toggleNote]
+    [phase, selectedCell, givenCells, notesMode, placeDigit, toggleNote]
   );
 
   // ---- Erase ----
@@ -513,8 +511,28 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
     setFeedback(null);
   }, [phase, selectedCell, givenCells]);
 
-  // ---- Check solution ----
+  // ---- Submit and Check handlers ----
 
+  const confirmAndSubmit = useCallback(() => {
+    if (!solution || !startedAtMs) return;
+    setShowConfirmSubmit(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    const { correct } = validateSudoku(grid, solution);
+    submitResult(grid, solution, correct, checkCount, penaltyMs, startedAtMs);
+  }, [grid, solution, checkCount, penaltyMs, startedAtMs, submitResult]);
+
+  const handleSubmit = useCallback(() => {
+    if (phase !== 'playing' || !solution || !startedAtMs) return;
+
+    if (!isGridFull) {
+      setShowConfirmSubmit(true);
+      return;
+    }
+
+    confirmAndSubmit();
+  }, [phase, solution, startedAtMs, isGridFull, confirmAndSubmit]);
+
+  // Check solution (hint with 15s penalty)
   const handleCheck = useCallback(() => {
     if (phase !== 'playing' || !solution || !startedAtMs) return;
 
@@ -546,6 +564,27 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
       handleTimeExpiry(grid, solution, newCheckCount, newPenalty, startedAtMs);
     }
   }, [phase, solution, grid, checkCount, penaltyMs, startedAtMs, submitResult, handleTimeExpiry]);
+
+  // Physical keyboard support
+  useEffect(() => {
+    if (phase !== 'playing') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key >= '1' && e.key <= '6') {
+        const digit = parseInt(e.key, 10);
+        handleNumberPress(digit);
+      } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
+        handleErase();
+      } else if (e.key === 'n' || e.key === 'N') {
+        setNotesMode((prev) => !prev);
+      } else if (e.key === 'Escape') {
+        setSelectedCell(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, handleNumberPress, handleErase]);
 
   // ---- Render: Loading ----
 
@@ -635,10 +674,11 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
             const isError = duplicates.has(key) && !isGiven;
             const cellValue = grid[r][c];
             const isSameNumber =
-              selectedCell &&
-              cellValue !== 0 &&
-              grid[selectedCell[0]][selectedCell[1]] === cellValue &&
-              !isSelected;
+              (selectedCell &&
+                cellValue !== 0 &&
+                grid[selectedCell[0]][selectedCell[1]] === cellValue &&
+                !isSelected) ||
+              (!selectedCell && selectedDigit !== null && cellValue === selectedDigit);
 
             // Subgrid border classes
             const borderRight = c === 2; // after column 2 (0-indexed)
@@ -685,6 +725,15 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
         )}
       </div>
 
+      {/* Unfilled cells status */}
+      <div className="sudoku-status-bar">
+        <span>
+          {emptyCellsCount === 0
+            ? '✨ All cells filled! Ready to submit.'
+            : `${emptyCellsCount} empty cell${emptyCellsCount === 1 ? '' : 's'} remaining`}
+        </span>
+      </div>
+
       {/* Controls */}
       <div className="sudoku-controls">
         {/* Number buttons */}
@@ -696,6 +745,7 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
                 selectedDigit === d ? ' active' : ''
               }${(counts.get(d) || 0) >= SIZE ? ' completed' : ''}`}
               onClick={() => handleNumberPress(d)}
+              type="button"
             >
               {d}
             </button>
@@ -707,12 +757,14 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
           <button
             className="sudoku-action-btn"
             onClick={handleErase}
+            type="button"
           >
             ✕ Erase
           </button>
           <button
             className={`sudoku-action-btn${notesMode ? ' notes-active' : ''}`}
             onClick={() => setNotesMode((prev) => !prev)}
+            type="button"
           >
             ✎ Notes{notesMode ? ' ON' : ''}
           </button>
@@ -725,14 +777,55 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
           </div>
         )}
 
-        {/* Check button */}
-        <button
-          className="sudoku-check-btn"
-          onClick={handleCheck}
-          disabled={!isGridFull}
-        >
-          {isGridFull ? 'Check Solution' : 'Fill all cells to check'}
-        </button>
+        {/* Submit & Check Actions */}
+        <div className="sudoku-submit-row">
+          <button
+            className="sudoku-submit-btn"
+            onClick={handleSubmit}
+            type="button"
+          >
+            {isGridFull ? '✓ Submit Puzzle' : `Submit (${emptyCellsCount} empty)`}
+          </button>
+          <button
+            className="sudoku-check-hint-btn"
+            onClick={handleCheck}
+            type="button"
+            title="Check solution (+15s penalty)"
+          >
+            Check (+15s)
+          </button>
+        </div>
+
+        {/* Confirmation Modal if submitting with empty cells */}
+        {showConfirmSubmit && (
+          <div className="sudoku-confirm-overlay">
+            <div className="sudoku-confirm-dialog">
+              <h4 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', fontWeight: 700 }}>
+                Submit Puzzle?
+              </h4>
+              <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: '#64748b' }}>
+                You still have <strong>{emptyCellsCount}</strong> unfilled cell
+                {emptyCellsCount === 1 ? '' : 's'}. Any unfilled cell will count as incorrect.
+              </p>
+              <div className="sudoku-confirm-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-small"
+                  onClick={() => setShowConfirmSubmit(false)}
+                >
+                  Keep Playing
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-small"
+                  onClick={confirmAndSubmit}
+                >
+                  Submit Anyway
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import {
   subscribeToMembers,
   subscribeToDays,
   subscribeToDayStatuses,
+  subscribeToDayAttempts,
 } from '../lib/roomService';
 
 export function useRoom(roomId: string | null) {
@@ -63,4 +64,20 @@ export function useDayStatuses(
   }, [roomId, dayNumber]);
 
   return statuses;
+}
+
+export function useDayAttempts(
+  roomId: string | null,
+  dayNumber: number
+) {
+  const [attempts, setAttempts] = useState<Record<string, Record<string, any>>>({});
+
+  useEffect(() => {
+    if (!roomId || dayNumber < 1) return;
+
+    const unsub = subscribeToDayAttempts(roomId, dayNumber, setAttempts);
+    return () => unsub();
+  }, [roomId, dayNumber]);
+
+  return attempts;
 }

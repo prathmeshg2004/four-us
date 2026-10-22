@@ -312,6 +312,23 @@ export function subscribeToDayStatuses(
   });
 }
 
+export function subscribeToDayAttempts(
+  roomId: string,
+  dayNumber: number,
+  callback: (attempts: Record<string, Record<string, any>>) => void
+) {
+  const attemptsRef = collection(
+    db, 'rooms', roomId, 'days', String(dayNumber), 'attempts'
+  );
+  return onSnapshot(attemptsRef, (snap) => {
+    const attempts: Record<string, Record<string, any>> = {};
+    snap.forEach((d) => {
+      attempts[d.id] = d.data();
+    });
+    callback(attempts);
+  });
+}
+
 export function subscribeToDays(
   roomId: string,
   callback: (days: Record<number, import('../types').DayRecord>) => void

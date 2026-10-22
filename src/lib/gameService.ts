@@ -46,23 +46,23 @@ export async function submitAttempt(
         throw new Error('Already submitted this game');
       }
       // Merge with existing attempt doc
-      transaction.update(attemptRef, {
+      transaction.set(attemptRef, {
         [gameKey]: attempt,
-      });
+      }, { merge: true });
     } else {
       transaction.set(attemptRef, {
         [attempt.gameType]: attempt,
       });
     }
 
-    // Update the public status
+    // Update the public status (use set with merge: true so it never throws if document was not pre-created)
     const statusRef = doc(
       db, 'rooms', roomId, 'days', String(dayNumber), 'statuses', user.uid
     );
     const statusKey = `${attempt.gameType}Attempted`;
-    transaction.update(statusRef, {
+    transaction.set(statusRef, {
       [statusKey]: true,
-    });
+    }, { merge: true });
   });
 }
 

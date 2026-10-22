@@ -2,7 +2,7 @@
 // Dashboard Page — Two-Player Split Mobile Dashboard
 // ============================================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Room,
   PlayerMember,
@@ -11,9 +11,14 @@ import {
   GameType,
   PLAYER_COLORS,
 } from '../types';
-import { useDayStatuses } from '../hooks/useRoom';
-import { useCountdown } from '../hooks/useCountdown';
-import { finalizeDayInFirestore } from '../lib/scoring';
+import { useDayStatuses, useDayAttempts } from '../hooks/useRoom';
+import {
+  finalizeDayInFirestore,
+  scoreFiveLetter,
+  scoreSudoku,
+  scoreWordGrid,
+  scoreKnowMe,
+} from '../lib/scoring';
 import FiveLetterGame from '../components/games/five-letter/FiveLetterGame';
 import MiniSudokuGame from '../components/games/mini-sudoku/MiniSudokuGame';
 import WordGridGame from '../components/games/word-grid/WordGridGame';
@@ -48,8 +53,9 @@ export default function DashboardPage({
   const currentDay = room.currentDay || 1;
   const currentDayRecord = days[currentDay];
 
-  // Subscribe to current day statuses
+  // Subscribe to current day statuses & attempts
   const statuses = useDayStatuses(roomId, currentDay);
+  const dayAttempts = useDayAttempts(roomId, currentDay);
 
   // Modal states
   const [activeGame, setActiveGame] = useState<GameType | null>(null);
@@ -66,12 +72,143 @@ export default function DashboardPage({
 
   const myStatus = statuses[currentUserId];
 
-  // Countdown to next daily reveal
-  const nextRevealCountdown = useCountdown(currentDayRecord?.endsAt || null);
+  // Helper to check if a game is attempted
+  const isGameAttempted = (status: PlayerDayStatus | undefined, game: GameType): boolean => {
+    if (!status) return false;
+    switch (game) {
+      case 'fiveLetter':
+        return status.fiveLetterAttempted;
+      case 'sudoku':
+        return status.sudokuAttempted;
+      case 'wordGrid':
+        return status.wordGridAttempted;
+      case 'knowMe':
+        return status.knowMeAttempted;
+    }
+  };
 
-  // Overall 10-day countdown
-  const finalDayRecord = days[10];
-  const overallCountdown = useCountdown(finalDayRecord?.endsAt || null);
+  // 1. Reveal Countdown: Always in a 24-hour cycle counting down to 00:00:00
+  const revealTargetMs = currentDayRecord?.endsAt
+    ? currentDayRecord.endsAt.toMillis()
+    : Date.now() + 24 * 3600 * 1000;
+
+  const [revealMsRemaining, setRevealMsRemaining] = useState<number>(() => {
+    const diff = revealTargetMs - Date.now();
+    return Math.min(24 * 60 * 60 * 1000, Math.max(0, diff));
+  });
+
+  useEffect(() => {
+    const update = () => {
+      const diff = revealTargetMs - Date.now();
+      setRevealMsRemaining(Math.min(24 * 60 * 60 * 1000, Math.max(0, diff)));
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [revealTargetMs]);
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const rSecs = Math.floor(revealMsRemaining / 1000);
+  const rHours = Math.floor(rSecs / 3600);
+  const rMins = Math.floor((rSecs % 3600) / 60);
+  const rSec = rSecs % 60;
+  const revealTimerFormatted = `${pad(rHours)}:${pad(rMins)}:${pad(rSec)}`;
+
+  // 2. 10-day Total: ONLY show "days remaining", NO hours or mins
+  const daysRemaining = Math.max(1, 10 - currentDay + 1);
+  const totalDaysText = `${daysRemaining} days remaining`;
+
+  // Compute live scores for each game if both have attempted
+  const gameScores = useMemo(() => {
+    const map: Record<
+      GameType,
+      {
+        p1Points: number;
+        p2Points: number;
+        outcomeText: string;
+      } | null
+    > = {
+      fiveLetter: null,
+      sudoku: null,
+      wordGrid: null,
+      knowMe: null,
+    };
+
+    const p1Atts = dayAttempts[p1Id] || {};
+    const p2Atts = dayAttempts[p2Id] || {};
+
+    // 1. Wordle
+    const p1FL = isGameAttempted(statuses[p1Id], 'fiveLetter');
+    const p2FL = isGameAttempted(statuses[p2Id], 'fiveLetter');
+    if (p1FL && p2FL && p1Atts.fiveLetter && p2Atts.fiveLetter) {
+      const res = scoreFiveLetter(p1Atts.fiveLetter, p2Atts.fiveLetter, p1Id, p2Id);
+      const p1Pts = res.winnerId === p1Id ? 1 : 0;
+      const p2Pts = res.winnerId === p2Id ? 1 : 0;
+      let outcome = '🤝 Tied / No point awarded';
+      if (res.winnerId === p1Id) outcome = `🏆 ${p1Member?.displayName || 'Player 1'} won (+1 pt)`;
+      else if (res.winnerId === p2Id) outcome = `🏆 ${p2Member?.displayName || 'Player 2'} won (+1 pt)`;
+      map.fiveLetter = { p1Points: p1Pts, p2Points: p2Pts, outcomeText: outcome };
+    }
+
+    // 2. Mini Sudoku
+    const p1Su = isGameAttempted(statuses[p1Id], 'sudoku');
+    const p2Su = isGameAttempted(statuses[p2Id], 'sudoku');
+    if (p1Su && p2Su && p1Atts.sudoku && p2Atts.sudoku) {
+      const res = scoreSudoku(p1Atts.sudoku, p2Atts.sudoku, p1Id, p2Id);
+      const p1Pts = res.winnerId === p1Id ? 1 : 0;
+      const p2Pts = res.winnerId === p2Id ? 1 : 0;
+      let outcome = '🤝 Tied / No point awarded';
+      if (res.winnerId === p1Id) outcome = `🏆 ${p1Member?.displayName || 'Player 1'} won (+1 pt)`;
+      else if (res.winnerId === p2Id) outcome = `🏆 ${p2Member?.displayName || 'Player 2'} won (+1 pt)`;
+      map.sudoku = { p1Points: p1Pts, p2Points: p2Pts, outcomeText: outcome };
+    }
+
+    // 3. Word Grid
+    const p1WG = isGameAttempted(statuses[p1Id], 'wordGrid');
+    const p2WG = isGameAttempted(statuses[p2Id], 'wordGrid');
+    if (p1WG && p2WG && p1Atts.wordGrid && p2Atts.wordGrid) {
+      const res = scoreWordGrid(p1Atts.wordGrid, p2Atts.wordGrid, p1Id, p2Id);
+      const p1Pts = res.winnerId === p1Id ? 1 : 0;
+      const p2Pts = res.winnerId === p2Id ? 1 : 0;
+      let outcome = '🤝 Tied / No point awarded';
+      if (res.winnerId === p1Id) outcome = `🏆 ${p1Member?.displayName || 'Player 1'} won (+1 pt)`;
+      else if (res.winnerId === p2Id) outcome = `🏆 ${p2Member?.displayName || 'Player 2'} won (+1 pt)`;
+      map.wordGrid = { p1Points: p1Pts, p2Points: p2Pts, outcomeText: outcome };
+    }
+
+    // 4. Guess It
+    const p1KM = isGameAttempted(statuses[p1Id], 'knowMe');
+    const p2KM = isGameAttempted(statuses[p2Id], 'knowMe');
+    if (p1KM && p2KM && p1Atts.knowMe && p2Atts.knowMe) {
+      const res = scoreKnowMe(p1Atts.knowMe, p2Atts.knowMe);
+      const p1Pts = res.player1Point ? 1 : 0;
+      const p2Pts = res.player2Point ? 1 : 0;
+      let outcome = 'No predictions matched (0 pts)';
+      if (p1Pts && p2Pts) outcome = '🎉 Both guessed correctly! (+1 each)';
+      else if (p1Pts) outcome = `🎉 ${p1Member?.displayName || 'Player 1'} guessed correctly (+1 pt)`;
+      else if (p2Pts) outcome = `🎉 ${p2Member?.displayName || 'Player 2'} guessed correctly (+1 pt)`;
+      map.knowMe = { p1Points: p1Pts, p2Points: p2Pts, outcomeText: outcome };
+    }
+
+    return map;
+  }, [dayAttempts, statuses, p1Id, p2Id, p1Member?.displayName, p2Member?.displayName]);
+
+  // Running total calculation with live points from today
+  const liveP1DayPoints = useMemo(() => {
+    return Object.values(gameScores).reduce((sum, s) => sum + (s?.p1Points || 0), 0);
+  }, [gameScores]);
+
+  const liveP2DayPoints = useMemo(() => {
+    return Object.values(gameScores).reduce((sum, s) => sum + (s?.p2Points || 0), 0);
+  }, [gameScores]);
+
+  const displayedP1Score = currentDayRecord?.finalized
+    ? (room.player1Score || 0)
+    : (room.player1Score || 0) + liveP1DayPoints;
+
+  const displayedP2Score = currentDayRecord?.finalized
+    ? (room.player2Score || 0)
+    : (room.player2Score || 0) + liveP2DayPoints;
 
   // Show tutorial on first game start
   useEffect(() => {
@@ -125,21 +262,6 @@ export default function DashboardPage({
     setRevealDayNumber(null);
   };
 
-  // Helper to check if a game is attempted
-  const isGameAttempted = (status: PlayerDayStatus | undefined, game: GameType): boolean => {
-    if (!status) return false;
-    switch (game) {
-      case 'fiveLetter':
-        return status.fiveLetterAttempted;
-      case 'sudoku':
-        return status.sudokuAttempted;
-      case 'wordGrid':
-        return status.wordGridAttempted;
-      case 'knowMe':
-        return status.knowMeAttempted;
-    }
-  };
-
   const p1Color = p1Member ? PLAYER_COLORS[p1Member.color] : '#FF6B6B';
   const p2Color = p2Member ? PLAYER_COLORS[p2Member.color] : '#4ECDC4';
 
@@ -169,7 +291,7 @@ export default function DashboardPage({
           <div className="dash-player-info">
             <span className="dash-player-name">{p1Member?.displayName || 'Player 1'}</span>
             <span className="dash-player-score" style={{ color: p1Color }}>
-              {room.player1Score || 0}
+              {displayedP1Score}
             </span>
           </div>
         </div>
@@ -191,7 +313,7 @@ export default function DashboardPage({
           <div className="dash-player-info" style={{ alignItems: 'flex-end' }}>
             <span className="dash-player-name">{p2Member?.displayName || 'Player 2'}</span>
             <span className="dash-player-score" style={{ color: p2Color }}>
-              {room.player2Score || 0}
+              {displayedP2Score}
             </span>
           </div>
         </div>
@@ -207,10 +329,10 @@ export default function DashboardPage({
         </div>
         <div className="dash-timers-right">
           <div className="dash-timer-item">
-            Reveal: <span>{nextRevealCountdown.formatted}</span>
+            Reveal: <span>{revealTimerFormatted}</span>
           </div>
           <div className="dash-timer-item">
-            Total: <span>{overallCountdown.formatted}</span>
+            Total: <span>{totalDaysText}</span>
           </div>
         </div>
       </div>
@@ -275,24 +397,32 @@ export default function DashboardPage({
             const myAttempted = isGameAttempted(myStatus, game.id);
             const bothAttempted = Boolean(p1Attempted && p2Attempted);
 
-            // Determine if winner information can be displayed
+            // Determine if winner / score information can be displayed
             const daySummary = currentDayRecord?.resultSummary;
+            const liveScore = gameScores[game.id];
+
+            let p1Points: number | null = null;
+            let p2Points: number | null = null;
             let outcomeText: string | null = null;
 
             if (daySummary) {
               const res = daySummary[game.id];
               if (game.id === 'knowMe') {
                 const km = daySummary.knowMe;
-                if (km.player1Point && km.player2Point) {
+                p1Points = km.player1Point ? 1 : 0;
+                p2Points = km.player2Point ? 1 : 0;
+                if (p1Points && p2Points) {
                   outcomeText = '🎉 Both guessed correctly! (+1 each)';
-                } else if (km.player1Point) {
+                } else if (p1Points) {
                   outcomeText = `🎉 ${p1Member?.displayName} guessed correctly (+1 pt)`;
-                } else if (km.player2Point) {
+                } else if (p2Points) {
                   outcomeText = `🎉 ${p2Member?.displayName} guessed correctly (+1 pt)`;
                 } else {
-                  outcomeText = 'No predictions matched';
+                  outcomeText = 'No predictions matched (0 pts)';
                 }
               } else if (res && 'winnerId' in res) {
+                p1Points = res.winnerId === p1Id ? 1 : 0;
+                p2Points = res.winnerId === p2Id ? 1 : 0;
                 if (res.winnerId === p1Id) {
                   outcomeText = `🏆 ${p1Member?.displayName} won (+1 pt)`;
                 } else if (res.winnerId === p2Id) {
@@ -301,9 +431,15 @@ export default function DashboardPage({
                   outcomeText = '🤝 Tied / No point awarded';
                 }
               }
+            } else if (liveScore) {
+              p1Points = liveScore.p1Points;
+              p2Points = liveScore.p2Points;
+              outcomeText = liveScore.outcomeText;
             } else if (bothAttempted) {
-              outcomeText = '✨ Both players have submitted! Winner reveals at rollover.';
+              outcomeText = 'Calculating scores...';
             }
+
+            const isScored = p1Points !== null && p2Points !== null;
 
             return (
               <div key={game.id} className="dash-game-card">
@@ -316,13 +452,20 @@ export default function DashboardPage({
                 <div className="dash-card-split-body">
                   {/* Player 1 Left Side */}
                   <div className="dash-card-half p1">
-                    <span
-                      className={`dash-status-pill ${
-                        p1Attempted ? 'attempted' : 'not-attempted'
-                      }`}
-                    >
-                      {p1Attempted ? '✓ Attempted' : '⏳ Waiting'}
-                    </span>
+                    {isScored ? (
+                      <div className={`dash-score-pill ${p1Points === 1 ? 'winner' : 'loser'}`}>
+                        <span className="dash-score-num">{p1Points}</span>
+                        <span className="dash-score-sub">{p1Points === 1 ? 'pt 🏆' : 'pts'}</span>
+                      </div>
+                    ) : (
+                      <span
+                        className={`dash-status-pill ${
+                          p1Attempted ? 'attempted' : 'not-attempted'
+                        }`}
+                      >
+                        {p1Attempted ? '✓ Attempted' : '⏳ Waiting'}
+                      </span>
+                    )}
                   </div>
 
                   {/* Center Clickable Logo Badge (Tapping this launches the game!) */}
@@ -340,19 +483,26 @@ export default function DashboardPage({
 
                   {/* Player 2 Right Side */}
                   <div className="dash-card-half p2">
-                    <span
-                      className={`dash-status-pill ${
-                        p2Attempted ? 'attempted' : 'not-attempted'
-                      }`}
-                    >
-                      {p2Attempted ? '✓ Attempted' : '⏳ Waiting'}
-                    </span>
+                    {isScored ? (
+                      <div className={`dash-score-pill ${p2Points === 1 ? 'winner' : 'loser'}`}>
+                        <span className="dash-score-num">{p2Points}</span>
+                        <span className="dash-score-sub">{p2Points === 1 ? 'pt 🏆' : 'pts'}</span>
+                      </div>
+                    ) : (
+                      <span
+                        className={`dash-status-pill ${
+                          p2Attempted ? 'attempted' : 'not-attempted'
+                        }`}
+                      >
+                        {p2Attempted ? '✓ Attempted' : '⏳ Waiting'}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 {/* Score / Winner outcome banner */}
                 {outcomeText && (
-                  <div className={`dash-card-outcome ${daySummary ? 'revealed' : ''}`}>
+                  <div className={`dash-card-outcome ${isScored ? 'revealed' : ''}`}>
                     {outcomeText}
                   </div>
                 )}
