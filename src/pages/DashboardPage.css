@@ -442,36 +442,35 @@
 /* Bottom Navigation */
 .dash-bottom-nav {
   flex-shrink: 0;
-  height: 52px;
+  height: 48px;
   background: #ffffff;
   border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-left: 12px;
-  padding-right: 125px; /* Dedicated reserved clearance for floating Netlify badge */
-  gap: 8px;
+  padding-left: 10px;
+  padding-right: 180px; /* Squeezed navigation to the left to completely clear Netlify badge */
+  gap: 6px;
   box-sizing: border-box;
 }
 
 .dash-nav-btn {
-  flex: 1;
-  max-width: 145px;
-  height: 38px;
+  flex: 0 0 auto;
+  height: 33px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  border-radius: 12px;
+  gap: 4px;
+  border-radius: 10px;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #64748b;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
-  padding: 0 10px;
+  padding: 0 9px;
 }
 
 .dash-nav-btn.active {
@@ -479,6 +478,17 @@
   background: #667eea;
   border-color: #5a67d8;
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.35);
+}
+
+@media (max-width: 375px) {
+  .dash-bottom-nav {
+    padding-right: 160px;
+    gap: 4px;
+  }
+  .dash-nav-btn {
+    padding: 0 7px;
+    font-size: 0.68rem;
+  }
 }
 
 /* Welcome Popup Overlay */

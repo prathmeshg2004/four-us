@@ -21,6 +21,7 @@ import {
   scoreWordGrid,
   scoreKnowMe,
 } from '../lib/scoring';
+import { getTournamentDayBounds } from '../lib/roomService';
 import FiveLetterGame from '../components/games/five-letter/FiveLetterGame';
 import MiniSudokuGame from '../components/games/mini-sudoku/MiniSudokuGame';
 import WordGridGame from '../components/games/word-grid/WordGridGame';
@@ -107,29 +108,26 @@ export default function DashboardPage({
     return () => clearInterval(interval);
   }, []);
 
-  // Ensure active day's endsAt is accurate in Firestore (heals any expired or pre-created days)
+  // Ensure active day's schedule strictly matches the tournament calendar:
+  // Starts 12:01 AM 23rd Oct 2026, 24 hours per day, Day 10 ends 12:01 AM 2nd Nov 2026
   useEffect(() => {
     if (!roomId || !currentDayRecord || currentDayRecord.finalized) return;
-    const now = Date.now();
-    const target = currentDayRecord.endsAt?.toMillis() || 0;
-    // If endsAt is in the past OR more than 24 hours in the future
-    if (target - now > 24 * 60 * 60 * 1000 || target <= now) {
+    const { startsAt, endsAt, startsAtMs, endsAtMs } = getTournamentDayBounds(currentDay);
+    const curStart = currentDayRecord.startsAt?.toMillis();
+    const curEnd = currentDayRecord.endsAt?.toMillis();
+    if (curStart !== startsAtMs || curEnd !== endsAtMs) {
       const dayRef = doc(db, 'rooms', roomId, 'days', String(currentDay));
-      updateDoc(dayRef, {
-        startsAt: Timestamp.fromMillis(now),
-        endsAt: Timestamp.fromMillis(now + 24 * 60 * 60 * 1000),
-      }).catch(console.error);
+      updateDoc(dayRef, { startsAt, endsAt }).catch(console.error);
     }
   }, [roomId, currentDay, currentDayRecord]);
 
-  // 1. Reveal Countdown: Always in a running 24-hour cycle counting down to 00:00:00
+  // 1. Reveal Countdown: Counts down to exactly 12:01 AM (end of the current 24-hour day)
   const revealMsRemaining = useMemo(() => {
-    const target = currentDayRecord?.endsAt?.toMillis();
-    if (!target) return 24 * 60 * 60 * 1000;
+    const { endsAtMs } = getTournamentDayBounds(currentDay);
+    const target = currentDayRecord?.endsAt?.toMillis() || endsAtMs;
     const diff = target - nowMs;
-    if (diff <= 0) return 0;
-    return diff > 24 * 60 * 60 * 1000 ? (diff % (24 * 60 * 60 * 1000)) : diff;
-  }, [currentDayRecord?.endsAt, nowMs]);
+    return Math.max(0, diff);
+  }, [currentDayRecord?.endsAt, currentDay, nowMs]);
 
   const pad = (n: number) => String(n).padStart(2, '0');
   const rSecs = Math.floor(revealMsRemaining / 1000);

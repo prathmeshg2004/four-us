@@ -21,12 +21,35 @@ import { Room, PlayerMember, PlayerColor, RoomStatus } from '../types';
 
 export const FIXED_ROOM_ID = 'four-us-pv';
 
+// Tournament Schedule: Starts 12:01 AM 23rd Oct 2026 (IST, UTC+05:30)
+// Day 1: Oct 23 00:01 IST -> Oct 24 00:01 IST
+// Day 10 ends: Nov 2 00:01 IST (12:01 AM)
+export const TOURNAMENT_START_MS = new Date('2026-10-23T00:01:00+05:30').getTime(); // 1792693860000
+
+export function getTournamentDayBounds(day: number) {
+  const startsAtMs = TOURNAMENT_START_MS + (day - 1) * 24 * 60 * 60 * 1000;
+  const endsAtMs = TOURNAMENT_START_MS + day * 24 * 60 * 60 * 1000;
+  return {
+    startsAt: Timestamp.fromMillis(startsAtMs),
+    endsAt: Timestamp.fromMillis(endsAtMs),
+    startsAtMs,
+    endsAtMs,
+  };
+}
+
+export function getCurrentTournamentDay(): number {
+  const now = Date.now();
+  if (now < TOURNAMENT_START_MS) return 1;
+  const day = Math.floor((now - TOURNAMENT_START_MS) / (24 * 60 * 60 * 1000)) + 1;
+  return Math.min(10, Math.max(1, day));
+}
+
 export function verifyPlayerCode(inputCode: string): 'prathmesh' | 'vidhi' | null {
   const clean = inputCode.trim().toUpperCase();
-  if (['PRATHMESH', 'PRATH', '2004', 'P1', '1111'].includes(clean)) {
+  if (clean === 'VI0612') {
     return 'prathmesh';
   }
-  if (['VIDHI', 'V1', '2222', '0000', 'VID'].includes(clean)) {
+  if (clean === 'UQ1202') {
     return 'vidhi';
   }
   return null;
@@ -38,15 +61,16 @@ export async function ensureFixedTwoPlayerGame(): Promise<string> {
 
   const roomRef = doc(db, 'rooms', FIXED_ROOM_ID);
   const snap = await getDoc(roomRef);
+  const currentTournamentDay = getCurrentTournamentDay();
+  const tournamentStart = Timestamp.fromMillis(TOURNAMENT_START_MS);
 
   if (!snap.exists()) {
-    const now = Timestamp.now();
     await setDoc(roomRef, {
       code: 'FOURUS',
       status: 'active',
-      createdAt: now,
-      startAt: now,
-      currentDay: 1,
+      createdAt: tournamentStart,
+      startAt: tournamentStart,
+      currentDay: currentTournamentDay,
       player1Id: 'prathmesh',
       player2Id: 'vidhi',
       player1Score: 0,
@@ -60,7 +84,7 @@ export async function ensureFixedTwoPlayerGame(): Promise<string> {
       color: 'coral',
       avatar: '🦁',
       ready: true,
-      joinedAt: now,
+      joinedAt: tournamentStart,
     });
 
     await setDoc(doc(db, 'rooms', FIXED_ROOM_ID, 'members', 'vidhi'), {
@@ -68,17 +92,25 @@ export async function ensureFixedTwoPlayerGame(): Promise<string> {
       color: 'teal',
       avatar: '🌸',
       ready: true,
-      joinedAt: now,
+      joinedAt: tournamentStart,
     });
+  } else {
+    const roomData = snap.data();
+    if (roomData.currentDay !== currentTournamentDay) {
+      await updateDoc(roomRef, { currentDay: currentTournamentDay });
+    }
+  }
 
-    for (let day = 1; day <= 10; day++) {
-      const dayStartMs = now.toMillis() + (day - 1) * 24 * 60 * 60 * 1000;
-      const dayEndMs = dayStartMs + 24 * 60 * 60 * 1000;
-      const dayRef = doc(db, 'rooms', FIXED_ROOM_ID, 'days', String(day));
+  // Ensure all 10 days have exact startsAt and endsAt matching tournament calendar
+  for (let day = 1; day <= 10; day++) {
+    const { startsAt, endsAt } = getTournamentDayBounds(day);
+    const dayRef = doc(db, 'rooms', FIXED_ROOM_ID, 'days', String(day));
+    const daySnap = await getDoc(dayRef);
+    if (!daySnap.exists()) {
       await setDoc(dayRef, {
         dayNumber: day,
-        startsAt: Timestamp.fromMillis(dayStartMs),
-        endsAt: Timestamp.fromMillis(dayEndMs),
+        startsAt,
+        endsAt,
         finalized: false,
         resultSummary: null,
       });
@@ -95,6 +127,13 @@ export async function ensureFixedTwoPlayerGame(): Promise<string> {
         wordGridAttempted: false,
         knowMeAttempted: false,
       });
+    } else {
+      const dData = daySnap.data();
+      const curStart = dData.startsAt?.toMillis();
+      const curEnd = dData.endsAt?.toMillis();
+      if (curStart !== startsAt.toMillis() || curEnd !== endsAt.toMillis()) {
+        await updateDoc(dayRef, { startsAt, endsAt });
+      }
     }
   }
 

@@ -66,8 +66,19 @@ export default function RoomPage() {
     );
   }
 
-  // Two-player game authentication
+  // Two-player game authentication & 24-hour session check
   const activePlayer = localStorage.getItem('fourUs_active_player');
+  const loginTimeStr = localStorage.getItem('fourUs_login_time');
+  const loginTime = loginTimeStr ? parseInt(loginTimeStr, 10) : 0;
+  const isSessionExpired = !loginTime || Date.now() - loginTime > 24 * 60 * 60 * 1000;
+
+  if (activePlayer && isSessionExpired) {
+    localStorage.removeItem('fourUs_active_player');
+    localStorage.removeItem('fourUs_login_time');
+    navigate('/');
+    return null;
+  }
+
   const effectiveUserId = (activePlayer === 'prathmesh' || activePlayer === 'vidhi')
     ? activePlayer
     : user.uid;
