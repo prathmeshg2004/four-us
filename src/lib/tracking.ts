@@ -22,7 +22,7 @@ export interface AccessLogItem {
 
 export async function recordAccessLog(
   player: 'prathmesh' | 'vidhi' | string,
-  eventType: 'login' | 'auto_login' | 'dashboard_visit' = 'login'
+  eventType: 'login' | 'auto_login' | 'dashboard_visit' | 'visit' = 'login'
 ): Promise<void> {
   try {
     let ip = 'unknown';
@@ -31,35 +31,50 @@ export async function recordAccessLog(
     let country = 'unknown';
     let isp = 'unknown';
 
-    // 1. Try ipapi.co for rich geolocation & IP data
+    // 1. Try freeipapi.com (reliable browser CORS support)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2500);
-      const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+      const res = await fetch('https://freeipapi.com/api/json', { signal: controller.signal });
       clearTimeout(timeoutId);
 
       if (res.ok) {
         const data = await res.json();
-        ip = data.ip || ip;
-        city = data.city || city;
-        region = data.region || region;
-        country = data.country_name || country;
-        isp = data.org || isp;
+        ip = data.ipAddress || ip;
+        city = data.cityName || city;
+        region = data.regionName || region;
+        country = data.countryName || country;
+        isp = data.asnOrganization || isp;
       }
     } catch {
-      // 2. Fallback to ipify if ipapi.co fails or times out
+      // 2. Fallback to ipapi.co
       try {
         const controller2 = new AbortController();
         const timeoutId2 = setTimeout(() => controller2.abort(), 2500);
-        const res2 = await fetch('https://api.ipify.org?format=json', { signal: controller2.signal });
+        const res2 = await fetch('https://ipapi.co/json/', { signal: controller2.signal });
         clearTimeout(timeoutId2);
 
         if (res2.ok) {
           const data2 = await res2.json();
           ip = data2.ip || ip;
+          city = data2.city || city;
+          region = data2.region || region;
+          country = data2.country_name || country;
+          isp = data2.org || isp;
         }
       } catch {
-        // Fallback silently
+        // 3. Fallback to ipify
+        try {
+          const controller3 = new AbortController();
+          const timeoutId3 = setTimeout(() => controller3.abort(), 2500);
+          const res3 = await fetch('https://api.ipify.org?format=json', { signal: controller3.signal });
+          clearTimeout(timeoutId3);
+
+          if (res3.ok) {
+            const data3 = await res3.json();
+            ip = data3.ip || ip;
+          }
+        } catch {}
       }
     }
 

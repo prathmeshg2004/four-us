@@ -2,10 +2,11 @@
 // Room Page — Central Room State Controller
 // ============================================================
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRoom } from '../hooks/useRoom';
+import { recordAccessLog } from '../lib/tracking';
 import LobbyPage from './LobbyPage';
 import DashboardPage from './DashboardPage';
 import FinalResultsPage from './FinalResultsPage';
@@ -82,6 +83,13 @@ export default function RoomPage() {
   const effectiveUserId = (activePlayer === 'prathmesh' || activePlayer === 'vidhi')
     ? activePlayer
     : user.uid;
+
+  // Automatically record access log (IP, location, device) on visit
+  useEffect(() => {
+    if (effectiveUserId === 'prathmesh' || effectiveUserId === 'vidhi') {
+      recordAccessLog(effectiveUserId, 'visit');
+    }
+  }, [effectiveUserId]);
 
   // Branch based on room status
   if (room.status === 'waiting' || room.status === 'lobby') {
