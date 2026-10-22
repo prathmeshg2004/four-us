@@ -7,8 +7,9 @@
   flex-direction: column;
   height: 100dvh;
   max-height: 100dvh;
-  max-width: 440px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   box-sizing: border-box;
   background-color: var(--bg-primary);
   position: relative;
@@ -221,7 +222,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  max-height: 82px;
+  min-height: 0;
 }
 
 .dash-game-center-title {
@@ -230,6 +231,7 @@
   justify-content: center;
   padding: 4px 8px 2px;
   background: #ffffff;
+  flex-shrink: 0;
 }
 
 .dash-game-name {
@@ -246,6 +248,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1;
+  min-height: 44px;
   align-items: center;
 }
 
@@ -407,52 +410,75 @@
 /* Outcome text under game */
 .dash-card-outcome {
   background: #f8fafc;
-  border-top: 1px solid #f1f5f9;
-  padding: 3px 8px;
+  border-top: 1px solid #edf2f7;
+  padding: 4px 10px;
   text-align: center;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #475569;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .dash-card-outcome.revealed {
   background: #f0fdf4;
-  color: #16a34a;
+  color: #15803d;
+  font-weight: 800;
+}
+
+/* History Drawer / Container */
+.dash-history-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Bottom Navigation */
 .dash-bottom-nav {
   flex-shrink: 0;
-  height: 46px;
-  background: white;
+  height: 52px;
+  background: #ffffff;
   border-top: 1px solid var(--border-color);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   align-items: center;
+  justify-content: flex-start;
+  padding-left: 12px;
+  padding-right: 125px; /* Dedicated reserved clearance for floating Netlify badge */
+  gap: 8px;
+  box-sizing: border-box;
 }
 
 .dash-nav-btn {
+  flex: 1;
+  max-width: 145px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 100%;
-  background: none;
-  border: none;
-  font-size: 0.8rem;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #64748b;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  padding: 0 10px;
 }
 
 .dash-nav-btn.active {
-  color: #667eea;
-  border-top: 2px solid #667eea;
-  background: rgba(102, 126, 234, 0.05);
+  color: #ffffff;
+  background: #667eea;
+  border-color: #5a67d8;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.35);
 }
 
 /* Welcome Popup Overlay */
@@ -499,7 +525,7 @@
 .dash-modal-content {
   background: white;
   width: 100%;
-  max-width: 440px;
+  max-width: 500px;
   height: 94dvh;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;

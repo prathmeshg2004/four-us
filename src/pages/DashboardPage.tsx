@@ -395,7 +395,7 @@ export default function DashboardPage({
 
       {/* History Modal / Drawer */}
       {showHistory ? (
-        <div className="container" style={{ padding: '16px 12px' }}>
+        <div className="dash-history-container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Past Rounds History</h2>
             <button className="btn btn-secondary btn-small" onClick={() => setShowHistory(false)}>
