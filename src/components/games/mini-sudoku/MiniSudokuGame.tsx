@@ -209,8 +209,20 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
         const progress = await getGameProgress(roomId, dayNumber, 'sudoku');
         if (!cancelled && progress) {
           const saved = progress as unknown as GameProgress;
-          if (saved.grid) setGrid(saved.grid);
-          if (saved.notes) setNotes(saved.notes);
+          if (saved.grid) {
+            if (typeof (saved.grid as unknown as string[])[0] === 'string') {
+              setGrid((saved.grid as unknown as string[]).map((r) => r.split('').map(Number)));
+            } else if (Array.isArray(saved.grid[0])) {
+              setGrid(saved.grid as number[][]);
+            }
+          }
+          if (saved.notes) {
+            if (typeof (saved.notes as unknown as string[])[0] === 'string') {
+              setNotes((saved.notes as unknown as string[]).map((r) => r.split('').map((ch) => ch === '1')));
+            } else if (Array.isArray(saved.notes[0])) {
+              setNotes(saved.notes as Notes);
+            }
+          }
           if (saved.checkCount) setCheckCount(saved.checkCount);
           if (saved.penaltyMs) setPenaltyMs(saved.penaltyMs);
           if (saved.selectedDigit !== undefined) setSelectedDigit(saved.selectedDigit);
@@ -283,8 +295,8 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
     }
     progressSaveTimeoutRef.current = setTimeout(() => {
       saveGameProgress(roomId, dayNumber, 'sudoku', {
-        grid,
-        notes,
+        grid: grid.map((r) => r.join('')),
+        notes: notes.map((n) => n.map((b) => (b ? '1' : '0')).join('')),
         startedAtMs,
         checkCount,
         penaltyMs,
@@ -333,7 +345,7 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
         dayNumber,
         startedAt: Timestamp.fromMillis(startMs),
         completedAt: Timestamp.now(),
-        grid: finalGrid,
+        grid: finalGrid.map((row) => row.join('')),
         solved,
         elapsedMs: Math.min(elapsed, TIME_LIMIT_MS),
         checkCount: checks,
@@ -343,27 +355,18 @@ const MiniSudokuGame: React.FC<MiniSudokuGameProps> = ({
 
       try {
         await submitAttempt(roomId, dayNumber, attempt);
-        setCompletionData({
-          solved,
-          elapsedMs: attempt.elapsedMs,
-          checkCount: checks,
-          correctCells,
-        });
-        setPhase('completed');
-        onComplete();
       } catch (err) {
         console.error('Failed to submit attempt:', err);
-        // If already submitted, show completion anyway
-        if ((err as Error)?.message?.includes('Already submitted')) {
-          setCompletionData({
-            solved,
-            elapsedMs: attempt.elapsedMs,
-            checkCount: checks,
-            correctCells,
-          });
-          setPhase('completed');
-        }
       }
+
+      setCompletionData({
+        solved,
+        elapsedMs: attempt.elapsedMs,
+        checkCount: checks,
+        correctCells,
+      });
+      setPhase('completed');
+      onComplete();
 
       submittingRef.current = false;
     },

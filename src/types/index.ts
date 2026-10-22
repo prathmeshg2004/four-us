@@ -162,7 +162,7 @@ export interface SudokuAttempt {
   dayNumber: number;
   startedAt: Timestamp;
   completedAt: Timestamp | null;
-  grid: number[][];
+  grid: number[][] | string[];
   solved: boolean;
   elapsedMs: number;
   checkCount: number;

@@ -3,6 +3,8 @@
 // ============================================================
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import {
   Room,
   PlayerMember,
@@ -87,25 +89,36 @@ export default function DashboardPage({
     }
   };
 
-  // 1. Reveal Countdown: Always in a 24-hour cycle counting down to 00:00:00
-  const revealTargetMs = currentDayRecord?.endsAt
-    ? currentDayRecord.endsAt.toMillis()
-    : Date.now() + 24 * 3600 * 1000;
-
-  const [revealMsRemaining, setRevealMsRemaining] = useState<number>(() => {
-    const diff = revealTargetMs - Date.now();
-    return Math.min(24 * 60 * 60 * 1000, Math.max(0, diff));
-  });
-
+  // Live ticker that updates every second
+  const [nowMs, setNowMs] = useState(Date.now());
   useEffect(() => {
-    const update = () => {
-      const diff = revealTargetMs - Date.now();
-      setRevealMsRemaining(Math.min(24 * 60 * 60 * 1000, Math.max(0, diff)));
-    };
-    update();
-    const interval = setInterval(update, 1000);
+    const interval = setInterval(() => setNowMs(Date.now()), 1000);
     return () => clearInterval(interval);
-  }, [revealTargetMs]);
+  }, []);
+
+  // Ensure active day's endsAt is accurate in Firestore (heals any expired or pre-created days)
+  useEffect(() => {
+    if (!roomId || !currentDayRecord || currentDayRecord.finalized) return;
+    const now = Date.now();
+    const target = currentDayRecord.endsAt?.toMillis() || 0;
+    // If endsAt is in the past OR more than 24 hours in the future
+    if (target - now > 24 * 60 * 60 * 1000 || target <= now) {
+      const dayRef = doc(db, 'rooms', roomId, 'days', String(currentDay));
+      updateDoc(dayRef, {
+        startsAt: Timestamp.fromMillis(now),
+        endsAt: Timestamp.fromMillis(now + 24 * 60 * 60 * 1000),
+      }).catch(console.error);
+    }
+  }, [roomId, currentDay, currentDayRecord]);
+
+  // 1. Reveal Countdown: Always in a running 24-hour cycle counting down to 00:00:00
+  const revealMsRemaining = useMemo(() => {
+    const target = currentDayRecord?.endsAt?.toMillis();
+    if (!target) return 24 * 60 * 60 * 1000;
+    const diff = target - nowMs;
+    if (diff <= 0) return 0;
+    return diff > 24 * 60 * 60 * 1000 ? (diff % (24 * 60 * 60 * 1000)) : diff;
+  }, [currentDayRecord?.endsAt, nowMs]);
 
   const pad = (n: number) => String(n).padStart(2, '0');
   const rSecs = Math.floor(revealMsRemaining / 1000);
@@ -265,6 +278,10 @@ export default function DashboardPage({
   const p1Color = p1Member ? PLAYER_COLORS[p1Member.color] : '#FF6B6B';
   const p2Color = p2Member ? PLAYER_COLORS[p2Member.color] : '#4ECDC4';
 
+  const totalLivePoints = displayedP1Score + displayedP2Score;
+  const p1Ratio = totalLivePoints > 0 ? (displayedP1Score / totalLivePoints) * 100 : 50;
+  const p2Ratio = totalLivePoints > 0 ? (displayedP2Score / totalLivePoints) * 100 : 50;
+
   return (
     <div
       className="dashboard-page animate-fade-in"
@@ -277,45 +294,83 @@ export default function DashboardPage({
     >
       {/* Sticky Top Score Bar */}
       <div className="dash-sticky-top">
-        {/* Player 1 Side */}
-        <div className="dash-player-score-box">
-          <div
-            className="dash-avatar-badge"
-            style={{
-              borderColor: p1Color,
-              backgroundColor: `${p1Color}15`,
-            }}
-          >
-            {p1Member?.avatar || '👤'}
+        <div className="dash-sticky-header-row">
+          {/* Player 1 Side */}
+          <div className="dash-player-score-box">
+            <div
+              className="dash-avatar-badge"
+              style={{
+                borderColor: p1Color,
+                backgroundColor: `${p1Color}15`,
+              }}
+            >
+              {p1Member?.avatar || '👤'}
+            </div>
+            <div className="dash-player-info">
+              <span className="dash-player-name">{p1Member?.displayName || 'Player 1'}</span>
+              <span className="dash-player-score" style={{ color: p1Color }}>
+                {displayedP1Score}
+              </span>
+              <div className="dash-score-mini-bar-track">
+                <div
+                  className="dash-score-mini-bar-fill"
+                  style={{
+                    width: `${Math.min(100, Math.max(displayedP1Score > 0 ? 12 : 0, (displayedP1Score / 20) * 100))}%`,
+                    backgroundColor: p1Color,
+                  }}
+                />
+              </div>
+            </div>
           </div>
-          <div className="dash-player-info">
-            <span className="dash-player-name">{p1Member?.displayName || 'Player 1'}</span>
-            <span className="dash-player-score" style={{ color: p1Color }}>
-              {displayedP1Score}
-            </span>
+
+          {/* VS Indicator */}
+          <div className="dash-vs-badge">VS</div>
+
+          {/* Player 2 Side */}
+          <div className="dash-player-score-box player2">
+            <div
+              className="dash-avatar-badge"
+              style={{
+                borderColor: p2Color,
+                backgroundColor: `${p2Color}15`,
+              }}
+            >
+              {p2Member?.avatar || '👤'}
+            </div>
+            <div className="dash-player-info" style={{ alignItems: 'flex-end' }}>
+              <span className="dash-player-name">{p2Member?.displayName || 'Player 2'}</span>
+              <span className="dash-player-score" style={{ color: p2Color }}>
+                {displayedP2Score}
+              </span>
+              <div className="dash-score-mini-bar-track player2">
+                <div
+                  className="dash-score-mini-bar-fill"
+                  style={{
+                    width: `${Math.min(100, Math.max(displayedP2Score > 0 ? 12 : 0, (displayedP2Score / 20) * 100))}%`,
+                    backgroundColor: p2Color,
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* VS Indicator */}
-        <div className="dash-vs-badge">VS</div>
-
-        {/* Player 2 Side */}
-        <div className="dash-player-score-box player2">
+        {/* Global Dual Score Bar directly below the scores */}
+        <div className="dash-top-score-bar-container">
           <div
-            className="dash-avatar-badge"
+            className="dash-top-score-bar-fill p1"
             style={{
-              borderColor: p2Color,
-              backgroundColor: `${p2Color}15`,
+              width: `${p1Ratio}%`,
+              backgroundColor: p1Color,
             }}
-          >
-            {p2Member?.avatar || '👤'}
-          </div>
-          <div className="dash-player-info" style={{ alignItems: 'flex-end' }}>
-            <span className="dash-player-name">{p2Member?.displayName || 'Player 2'}</span>
-            <span className="dash-player-score" style={{ color: p2Color }}>
-              {displayedP2Score}
-            </span>
-          </div>
+          />
+          <div
+            className="dash-top-score-bar-fill p2"
+            style={{
+              width: `${p2Ratio}%`,
+              backgroundColor: p2Color,
+            }}
+          />
         </div>
       </div>
 
@@ -450,12 +505,19 @@ export default function DashboardPage({
 
                 {/* Split Card Body with Center Clickable Logo */}
                 <div className="dash-card-split-body">
+                  {/* Connecting line that comes out of the middle logo and connects to 1 and 0 on both sides */}
+                  {isScored && (
+                    <>
+                      <div className="dash-score-line left" />
+                      <div className="dash-score-line right" />
+                    </>
+                  )}
+
                   {/* Player 1 Left Side */}
                   <div className="dash-card-half p1">
                     {isScored ? (
-                      <div className={`dash-score-pill ${p1Points === 1 ? 'winner' : 'loser'}`}>
-                        <span className="dash-score-num">{p1Points}</span>
-                        <span className="dash-score-sub">{p1Points === 1 ? 'pt 🏆' : 'pts'}</span>
+                      <div className="dash-green-circle" title={`Score: ${p1Points}`}>
+                        {p1Points}
                       </div>
                     ) : (
                       <span
@@ -484,9 +546,8 @@ export default function DashboardPage({
                   {/* Player 2 Right Side */}
                   <div className="dash-card-half p2">
                     {isScored ? (
-                      <div className={`dash-score-pill ${p2Points === 1 ? 'winner' : 'loser'}`}>
-                        <span className="dash-score-num">{p2Points}</span>
-                        <span className="dash-score-sub">{p2Points === 1 ? 'pt 🏆' : 'pts'}</span>
+                      <div className="dash-green-circle" title={`Score: ${p2Points}`}>
+                        {p2Points}
                       </div>
                     ) : (
                       <span
